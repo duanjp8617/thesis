@@ -1,0 +1,96 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Thesis.aux
+The style file: plain.bst
+Database file #1: egbibsample.bib
+Warning--I didn't find a database entry for ""
+Warning--to sort, need author or key in nfv-website
+Warning--to sort, need author or key in 3gpp-ims
+Warning--to sort, need author or key in epc
+Warning--to sort, need author or key in project-clearwater
+Warning--to sort, need author or key in nfv-white-paper
+Warning--to sort, need author or key in bro
+Warning--to sort, need author or key in firewall
+Warning--to sort, need author or key in lvs
+Warning--to sort, need author or key in http-keep-alive
+Warning--to sort, need author or key in ffmpeg
+Warning--to sort, need author or key in ftp
+Warning--to sort, need author or key in netmap
+Warning--to sort, need author or key in squid
+Warning--to sort, need author or key in actor-wiki
+Warning--to sort, need author or key in dpdk
+Warning--to sort, need author or key in bess
+Warning--to sort, need author or key in projectcode
+Warning--to sort, need author or key in haproxy
+Warning--to sort, need author or key in telephone-number-mapping
+Warning--to sort, need author or key in bro-scripting-tutorial
+Warning--to sort, need author or key in sha1
+Warning--to sort, need author or key in MHR
+Warning--to sort, need author or key in tornado-web-server
+Warning--to sort, need author or key in rethinkdb
+Warning--to sort, need author or key in coroutine
+Warning--to sort, need author or key in seastar
+Warning--to sort, need author or key in scylladb
+Warning--to sort, need author or key in netstar-source
+Warning--to sort, need author or key in umts
+Warning--to sort, need author or key in lte
+Warning--to sort, need author or key in sip
+Warning--to sort, need author or key in nfvmano
+Warning--to sort, need author or key in iplocation
+Warning--to sort, need author or key in floodlight
+Warning--to sort, need author or key in pjsip
+Warning--to sort, need author or key in snort
+Warning--to sort, need author or key in softlayer
+Warning--to sort, need author or key in erlang
+Warning--to sort, need author or key in akka
+Warning--to sort, need author or key in caf
+Warning--to sort, need author or key in Orleans
+Warning--to sort, need author or key in docker
+Warning--to sort, need author or key in cpplambda
+Warning--to sort, need author or key in cppexception
+Warning--to sort, need author or key in rss
+Warning--to sort, need author or key in tinyproxy
+Warning--empty institution in gember2012stratos
+Warning--can't use both volume and number fields in li2007combining
+You've used 95 entries,
+            2118 wiz_defined-function locations,
+            877 strings with 17107 characters,
+and the built_in function-call counts, 26952 in all, are:
+= -- 2446
+> -- 1365
+< -- 11
++ -- 571
+- -- 470
+* -- 1680
+:= -- 4077
+add.period$ -- 250
+call.type$ -- 95
+change.case$ -- 519
+chr.to.int$ -- 0
+cite$ -- 143
+duplicate$ -- 1045
+empty$ -- 2486
+format.name$ -- 470
+if$ -- 5895
+int.to.chr$ -- 0
+int.to.str$ -- 95
+missing$ -- 47
+newline$ -- 432
+num.names$ -- 98
+pop$ -- 863
+preamble$ -- 1
+purify$ -- 422
+quote$ -- 0
+skip$ -- 800
+stack$ -- 0
+substring$ -- 936
+swap$ -- 205
+text.length$ -- 11
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 380
+warning$ -- 48
+while$ -- 143
+width$ -- 97
+write$ -- 851
+(There were 49 warnings)
