@@ -1,0 +1,17 @@
+\section{Discussions}
+
+In our current \netstar~implementation, after issuing an asynchronous operation, an async-flow object waits for the asynchronous operation to complete, while \netstar~runs other async-flow objects. During this time, new flow packets coming to this async-flow object are buffered in its FIFO queue. This design choice is consistent with the semantics in most NFs, which requires processing packets in a flow strictly in sequence, and moving on to process the next packet only when all the processing on the current packet is completed. On the other hand, some NFs may carry out other asynchronous operations besides packet processing, \eg, writing logs into external storage. Such an extra operation can be done concurrently with packet processing. To handle this case,
+we can launch a stand-alone asynchronous operation from the core NF processing logic and obtain a returned future object. As long as we do not add this future object into the ``future-continuation'' chain that leads to the creation of \lstinline[style=InlineStyle]{future<action>} in Fig~\ref{fig:simulated_loop}, the async-flow object will not wait for the completion of this stand-alone asynchronous operation and it proceeds with packet handling concurrently.
+%we can easily revise our async-flow object design slightly, such that it does not wait for the completion of an asynchronous packet processing operation, but handles the extra operations first (which are also handled in future objects) as follows: we do not allow the future object handling the packet processing operation to return a future<action>, and then the async-flow object will not wait for the completion of this operation, but moves on to other operations.\chuan{check if the above descriptions are accurate}
+
+
+We have shown that using the future/promise paradigm can simplify asynchronous programming. Learning to use the future/promise abstraction may take some efforts, which makes use of various advanced C++14 features including move semantics, lambda functions and template meta programming. Our own experience is that, once a programmer has spent some time getting familiar with the future/promise abstraction, he can greatly improve his productivity when programming asynchronous code.
+
+In addition, porting existing NF code to our \netstar~framework is feasible, but may require some extra efforts on converting the callback-based programming interfaces to the future/promise abstraction, which usually involves exposing a new interface that returns a future object containing an asynchronous response. Once  the concept of future/promise is mastered, this process can be made relatively easy.
+
+%We have not experienced porting existing NF code to \netstar, but we do port the mica client interface code to \netstar so that our NFs can access mica database. The major effort is  on converting the callback-based query interface to a future/promise based interface.
+
+%Since Seastar provides several basic data structures that expose a future/promise based interface for porting existing software, this process is relatively easy. \chuan{add more explanations}% and can be done within a few days.
+
+
+% In case that the async-flow object does not want to wait for the asynchronous operation to complete, like asynchronous logging, the async-flow object can directly issue an isolated asynchronous operation without chaining continuation function to the returned future, the Seastar scheduler can schedule these operations to run concurrently in an asynchronous fashion.

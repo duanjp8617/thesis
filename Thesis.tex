@@ -1,0 +1,375 @@
+%% ----------------------------------------------------------------
+%% Thesis.tex -- MAIN FILE (the one that you compile with LaTeX)
+%% ----------------------------------------------------------------
+
+% Set up the document
+\documentclass[a4paper, 11pt, oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
+\graphicspath{Figures/}  % Location of the graphics files (set up for graphics to be in PDF format)
+
+% Include any extra LaTeX packages required
+\usepackage[square, numbers, comma, sort&compress]{natbib}  % Use the "Natbib" style for the references in the Bibliography
+\usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+%\usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
+\hypersetup{urlcolor=black, colorlinks=true, linkcolor=black, citecolor=black}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
+%\hypersetup{urlcolor=blue, colorlinks=true, linkcolor=blue, citecolor=blue}
+
+
+% these two packages are for displaying correct left quotation marks
+% by using \enquote{xxxxx} for "xxxxx" and \enquote*{xxxxx} for 'xxxxx'
+\usepackage[english]{babel}
+\usepackage[autostyle]{csquotes}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+
+%\usepackage{subfig} % to use \subfloat
+
+%\captionsetup[subfigure]{subrefformat=simple,labelformat=parens,listofformat=subsimple}
+\usepackage{wrapfig}
+%\usepackage{subfigure}
+\usepackage{amsmath,amsthm}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+%\usepackage[sc]{mathpazo}
+% Package to generate and customize Algorithm as per ACM style
+%\usepackage[lined,boxed,boxruled,linesnumbered,vlined,nofillcomment]{algorithm2e}
+%\usepackage[linesnumbered, boxruled, vlined]{algorithm2e}
+\usepackage{parskip}
+
+%\usepackage{titlesec}
+%\setcounter{secnumdepth}{4}     % make \paragraph same as \subsubsubsection
+
+%% for multi-row table
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{pbox}
+
+\usepackage[table]{xcolor}
+\usepackage{adjustbox}          % for rotating figures
+
+\def\netstar{\textit{NetStar}}
+\def\nfactor{\textit{NFVactor}}
+\def\eg{\textit{e.g.}}
+\def\ie{\textit{i.e.}}
+
+%scal ims
+\SetKwInput{KwMethod}{Method}
+\SetAlFnt{\footnotesize}
+\SetAlgoSkip{}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+
+%NetStar
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\lstdefinestyle{CStyle}{
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\scriptsize\ttfamily,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=C++
+}
+
+\lstdefinestyle{InlineStyle}{
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\scriptsize\ttfamily,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=C++
+}
+
+
+% \usepackage[none]{hyphenat}   % add this to prevent word breaking, good for word counting
+
+\newcommand{\authorname}{\textbf{Jingpu Duan}} % small caps for name
+\newcommand{\authorpage}{http://i.cs.hku.hk/~jpduan}
+\newcommand{\thesistitle}{Building Scalable, Resilient and High-performance NFV Systems} % title for normal uses
+\newcommand{\thesistitleCover}{Building Scalable, Resilient and High-performance NFV Systems} % title for cover page
+\newcommand{\thesistitleAbstract}{Building Scalable, Resilient and High-performance NFV Systems}   % title for abstract page
+%\newdateformat{mydate}{\monthname[\THEMONTH] \THEYEAR}
+%\date{\mydate\today}
+\newcommand{\mydate}{February, 2018}
+\providecommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%% ----------------------------------------------------------------
+\begin{document}
+%\setlength{\parindent}{2em} %% indent paragraphs except the first one in the sections
+\frontmatter      % Begin Roman style (i, ii, iii, iv...) page numbering
+
+% Set up the Title Page
+\title  {\thesistitle{}}
+\authors  {\texorpdfstring
+            {\href{\authorpage}{\authorname{}}}
+            {\authorname{}}
+            }
+\addresses  {\groupname\\\deptname\\\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
+\date       {\today}
+\subject    {Network Function Virtualization}
+\keywords   {NFV}
+
+\maketitle
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % It is better to have smaller font and larger line spacing than the other way round
+
+% Define the page headers using the FancyHdr package and set up for one-sided printing
+\fancyhead{}  % Clears all page headers and footers
+\rhead{\thepage}  % Sets the right side header to show the page number
+\lhead{}  % Clears the left side page header
+
+\pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
+
+%% ----------------------------------------------------------------
+% Declaration Page required for the Thesis, your institution may give you a different text to place here
+\Declaration{
+
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+\vspace{.5in}
+
+\noindent I declare that this thesis represents my own work, except where due acknowledgement is made, and that it has not been previously included in a thesis, dissertation or report submitted to this University or to any other institution for a degree, diploma or other qualiﬁcations.
+
+\vfill
+
+\noindent Signed:\\
+\rule[1em]{25em}{0.5pt}  % This prints a line for the signature
+
+\authornames \\
+\mydate
+}
+\clearpage  % Declaration ended, now start a new page
+
+%%% ----------------------------------------------------------------
+%% The "Funny Quote Page"
+%\pagestyle{empty}  % No headers or footers for the following pages
+%
+%\null\vfill
+%% Now comes the "Funny Quote", written in italics
+%\textit{``Write a funny quote here.''}
+%
+%\begin{flushright}
+%If the quote is taken from someone, their name goes here
+%\end{flushright}
+%
+%\vfill\vfill\vfill\vfill\vfill\vfill\null
+%\clearpage  % Funny Quote page ended, start a new page
+%%% ----------------------------------------------------------------
+
+% The Abstract Page
+\addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
+\lhead{\emph{Abstract}}  % Set the left side page header to "Contents"
+\abstract{
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+Over the past years, Network Function Virtualization (NFV) becomes an important research topic. NFV technology advocates replacing dedicated hardware network functions (NFs) with virtualized NFs running on standard virtualization platform, which can significantly reduce the deployment cost and management complexity of NFs.
+
+However, there has been several problems that bother the practitioners of NFV technology. First, the development of cloud technology calls for deploying network services across geo-distributed datacenters to server people living in a wide range. Yet NFV system suffers poor scalability when being deployed across geo-distributed datacenters, as scaling across multiple datacenters requires non-trivial interactions between various NFV system components. Second, resilience functionality, including failure resilience and flow migration, is of pivotal importance in NFV system. But, existing NFV systems implementing resilience functionalities usually have unsatisfactory performance due to heavyweight execution method and centralized control. Finally, NFs are more than simple packet processors, they need to contact external services to achieve advanced functionalities. To achieve best performance, NF software is often implemented using callback-based asynchronous programming style, which is complex and error-prone. Moreover, the increased implementation complexity brought by callbacks further limits programmers from enriching NF software with more advanced functionalities.
+
+Regarding the three problems, this thesis proposes three resulting NFV systems, including \textit{ScalIMS}, \nfactor~and \netstar, to tackle these problems using a systematic and empirical methodology.
+
+\textit{ScalIMS} designs a dynamic NFV service chain scaling system that is capable of scaling NFV service chains across geo-distributed datacenters, using IMS system as a case study. \textit{ScalIMS} combines proactive and reactive approaches for timely, cost-effective scaling of the service chains, and is evaluated on a geo-distributed public cloud service. The evaluation result reveals that \textit{ScalIMS} can effectively scale multiple NFV service chains across geo-distributed datacenters for improved traffic quality and reduced NF resource consumption.
+
+\nfactor~is a novel NFV system that aims to provide lightweight failure resilience and high-performance flow migration by exploiting actor model to improve the parallelism of resilience functionalities, while the efficiency of the actor model is guaranteed by a carefully designed runtime system. Moreover, \nfactor~achieves transparent resilience: once a new NF is implemented for~\nfactor, the NF automatically acquires resilience support. The evaluation result shows that~\nfactor~achieves 10Gbps packet processing, flow migration completion time that is 144 times faster than existing system, and packet processing delay stablized at around 20 microseconds during replication.
+
+\netstar~is a new NF programming framework that brings the future/promise abstraction to the NF dataplane. \netstar~simplifies asynchronous NF programming via a carefully designed async-flow interface that exploits the future/promise paradigm by chaining multiple continuation functions for asynchronous operations handling. NF programs implemented using \netstar~framework mimic simple synchronous programming, but are able to achieve full flow processing asynchrony, with simple, elegant code. The evaluation results demonstrates that \netstar~can effectively simplify asynchronous NF programming by substantially reducing the lines of code, while still approaching line-rate packet processing speeds.
+
+\vspace{1em}
+\noindent [{\bf 479 Words}]
+}
+
+\clearpage  % Abstract ended, start a new page
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
+
+% The Acknowledgements page, for thanking everyone
+\acknowledgements{
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+First, I would like to express my sincere gratitude towards my supervisor, Prof. Chuan Wu, for her kind help throughout the course of my graduate study. She has been encouraging and motivating me to pursue my own research goal and I really appreciate all the precious discussions that we had during the past five years. Besides research, Prof. Chuan Wu also helped me get through so many obstacles that I had in life. Without Prof. Chuan Wu's kind help, I wouldn't have completed my graduate study.
+
+Second, I would like to thank Dr. Heming Cui for his kind help and discussions on the project that we worked together. Dr. Heming Cui's passion for solving challenging research problems really motivates me to keep on improving the quality of my research work.
+
+I would like to thank various group members who I have worked with: Dr. Yu Wu, Dr. Jian Zhao, Dr. Xuanjia Qiu, Zhizhong Zhang, Xiaoxi Zhang, Yanghua Peng, Yixin Bao, Qihang Sun, Xiaodong Yi, Junjie Wang and many others. This journey would not be so memorable without all the support and help from all of them. I would also like to thank my collaborators including Dr. Franck Le and Prof. Alex X. Liu, for their important discussions that make my research work better.
+
+Finally, I would like to thank my parents for raising me and giving me power to complete my graduate study. I would like to thank my fiance, Bingjie Zhao, for all the love that she gave me.
+
+The entire thesis is dedicated to my dearest mother.
+}
+%\clearpage  % End of the Acknowledgements
+%% ----------------------------------------------------------------
+
+\pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
+
+
+%% ----------------------------------------------------------------
+\lhead{\emph{Table of Contents}}  % Set the left side page header to "Contents"
+\tableofcontents  % Write out the Table of Contents
+\addcontentsline{toc}{chapter}{Table of Contents} % required for Contents
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+%% ----------------------------------------------------------------
+\lhead{\emph{List of Figures}}  % Set the left side page header to "List if Figures"
+\listoffigures  % Write out the List of Figures
+
+%% ----------------------------------------------------------------
+\lhead{\emph{List of Tables}}  % Set the left side page header to "List of Tables"
+\listoftables  % Write out the List of Tables
+
+\lhead{\emph{List of Algorithms}}  % Set the left side page header to "List of Tables"
+\listofalgorithms
+\addcontentsline{toc}{chapter}{List of Algorithms} % required for list of algorithms
+
+%% ----------------------------------------------------------------
+\setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
+\clearpage  % Start a new page
+\lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
+\listofsymbols{lm{1cm}l}  % Include a list of Abbreviations (a table of two columns)
+{
+\textbf{NFV}    && \textbf{N}etwork \textbf{F}unction \textbf{V}irtualization \\
+\textbf{VNF}    && \textbf{V}irtualized \textbf{N}etwork \textbf{F}unction \\
+\textbf{VM}	&& \textbf{V}irtual \textbf{M}achine \\
+\textbf{MAB}     && \textbf{Multi}-\textbf{A}rmed \textbf{B}andit \\
+\textbf{IDS}    && \textbf{I}ntrusion \textbf{D}etection \textbf{S}ystem \\
+\textbf{TSP}	&& \textbf{T}ravelling \textbf{S}alesman \textbf{P}roblem \\
+}
+
+%%% ----------------------------------------------------------------
+%\clearpage  % Start a new page
+%\lhead{\emph{Physical Constants}}  % Set the left side page header to "Physical Constants"
+%\listofconstants{lrcl}  % Include a list of Physical Constants (a four column table)
+%{
+%% Constant Name & Symbol & = & Constant Value (with units) \\
+%Speed of Light & $c$ & $=$ & $2.997\ 924\ 58\times10^{8}\ \mbox{ms}^{-\mbox{s}}$ (exact)\\
+%
+%}
+
+%%% ----------------------------------------------------------------
+%\clearpage  %Start a new page
+%\lhead{\emph{Symbols}}  % Set the left side page header to "Symbols"
+%\listofnomenclature{lll}  % Include a list of Symbols (a three column table)
+%{
+%% symbol & name & unit \\
+%$a$ & distance & m \\
+%$P$ & power & W (Js$^{-1}$) \\
+%& & \\ % Gap to separate the Roman symbols from the Greek
+%$\omega$ & angular frequency & rads$^{-1}$ \\
+%}
+%%% ----------------------------------------------------------------
+%% End of the pre-able, contents and lists of things
+%% Begin the Dedication page
+
+\setstretch{1.3}  % Return the line spacing back to 1.3
+
+\pagestyle{empty}  % Page style needs to be empty for this page
+\dedicatory{Dedicated to my mother.}
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+
+
+%% ----------------------------------------------------------------
+\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+\pagestyle{fancy}  % Return the page headers back to the "fancy" style
+
+% Include the chapters of the thesis, as separate files
+% Just uncomment the lines as you write the chapters
+
+\input{chap-introduction/introduction}
+
+\input{chap-scalims/section/background.tex}
+\input{chap-scalims/section/motivation.tex}
+\input{chap-scalims/section/cp-scaling.tex}
+\input{chap-scalims/section/dp-scaling.tex}
+\input{chap-scalims/section/evaluation.tex}
+\input{chap-scalims/section/conclusion.tex}
+
+\input{chap-nfvactor/section/motivation.tex}
+\input{chap-nfvactor/section/runtime-and-controller.tex}
+\input{chap-nfvactor/section/nf-api.tex}
+\input{chap-nfvactor/section/migration-replication.tex}
+\input{chap-nfvactor/section/implementation.tex}
+\input{chap-nfvactor/section/evaluation.tex}
+\input{chap-nfvactor/section/related-work.tex}
+\input{chap-nfvactor/section/conclusion.tex}
+
+\input{chap-netstar/section/motivation.tex}
+\input{chap-netstar/section/overview.tex}
+\input{chap-netstar/section/framework.tex}
+\input{chap-netstar/section/example.tex}
+\input{chap-netstar/section/implementation.tex}
+\input{chap-netstar/section/new-evaluation.tex}
+\input{chap-netstar/section/discussion.tex}
+\input{chap-netstar/section/related-work.tex}
+\input{chap-netstar/section/conclusion.tex}
+
+
+%\input{chap-related-work/related-work}
+
+%\input{Chapter1} %introduction
+
+%\input{Chapter2} %related work
+
+%\input{Chapter3} %work 1
+
+%\input{Chapter4} %work 2
+
+%\input{Chapter5} %conclusion
+
+%\input{Chapters/Chapter1-Introduction} % Introduction
+
+%\input{Chapters/Chapter2-Smark-Subtitle} % work 1
+
+%\input{Chapters/Chapter3-Speaker-Naming} % work 2
+
+%\input{Chapters/Chapter4-Applications}   % applications
+
+%\input{Chapters/Chapter5-Conclusion} % Conclusion
+
+%% ----------------------------------------------------------------
+% Now begin the Appendices, including them as separate files
+
+\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+
+\appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
+% Appendix Title
+
+%\input{Appendices/AppendixB} % Appendix Title
+
+%\input{Appendices/AppendixC} % Appendix Title
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+\backmatter
+
+%% ----------------------------------------------------------------
+\label{Bibliography}
+\lhead{\emph{Bibliography}}  % Change the left side page header to "Bibliography"
+%\bibliographystyle{unsrtnat}  % Use the "unsrtnat" BibTeX style for formatting the Bibliography
+\bibliographystyle{plain}    %  abbrv, acm, alpha, apalike, ieeetr, plain, siam or unsrt
+\bibliography{egbibsample}  % The references (bibliography) information are stored in the file named "Bibliography.bib"
+
+\end{document}  % The End
+%% ----------------------------------------------------------------

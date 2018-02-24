@@ -1,0 +1,52 @@
+\section{Implemented NFs}
+\label{implementation}
+
+%The reason that we choose to implement \netstar on top of Seastar is two folds. First, Seastar has one of the most mature C++ future/promise implementation that allows future to be chained with arbitrary number of continuation functions. Other C++ future/promise implementations do exist \cite{}, but some of these are not mature enough to support chaining continuation functions. Second, Seastar has good integration with DPDK packet processing framework. In particular, it provides an efficient user-space TCP/IP stack and it is directly used by \netstar to implement application-level NFs like HTTP reverse proxy.
+
+\subsection{Enhancing Seastar}
+
+\netstar~is implemented on top of the Seastar framework, to exploit its C++-based future/promise implementation and DPDK support.
+ %The Seastar framework is designed for server programs and not to manipulate raw L2-L4 network packets.
+ Besides enabling raw L2-L4 packet processing that Seastar does not support, \netstar~makes several improvements.
+
+ \noindent\textbf{Eliminating Packet Copy.} In its TCP/IP stack, Seastar does not use DPDK's RTE packet buffer \cite{dpdk}. Instead, it defines its own packet object and introduces two additional packet copies for copying the payload content of each RTE packet buffer to and from a packet object %The first copy is when Seastar polls a batch of RTE packet buffers, it copies the payload content of each RTE packet buffer to a newly constructed packet object. The second copy is when Seastar sends the packet object out, Seastar needs to copy the content of the packet object back to the RTE packet buffer. Seastar does provide a hack to eliminate the packet copy, but our test result reveals that it does not improve the overall system performance.
+  While the additional packet copy does not affect the performance of the TCP/IP stack for building L7 applications, it does pose additional overhead for L2-L4 NFs. To eliminate the packet copy and speed up packet processing, we directly use RTE packet buffer for L2-L4 NFs. %, and only translate the RTE packet buffer to Seastar packet object whenever needed.
+ %(chuan: add this to sec.3) We also implement a hookpoint that serves as a packet distributor as discussed in Sec.~\ref{framework}, so that we can run NF application and TCP/IP stack simultaneously for advanced functionalities like DNS query when processing raw network packets.
+
+   %directly use RTE packet buffer for L2-L4 NFs.
+
+  %, and only translate the RTE packet buffer to Seastar packet object whenever needed.
+%(chuan: add this to sec.3) We also implement a hookpoint that serves as a packet distributor as discussed in Sec.~\ref{framework}, so that we can run NF application and TCP/IP stack simultaneously for advanced functionalities like DNS query when processing raw network packets.
+
+\noindent\textbf{Multiple TCP/IP Stacks.} Seastar treats its TCP/IP stack as a singleton. But an NF program may need more than one TCP/IP stack if the NF, \eg, proxy \cite{haproxy}, handles more than one NIC port.
+%\chuan{add an example}.
+We improve Seastar to allow the creation of multiple TCP/IP stacks.
+
+\subsection{Implementing Representative NFs}
+\label{NFs}
+
+We have built multiple representative NFs using \netstar.
+
+
+
+\vspace{1mm}
+\noindent\textbf{NFs from the StatelessNF paper \cite{201545}.} We reimplement four NFs from the StatelessNF paper, \ie, firewall, NAT, IDS and load balancer. Our implementation follows the pseudo-code logic in the paper, and leverages our async-flow interface. The major differences are: (1) we do not need to set up a dedicated polling thread for each worker thread to poll each NIC queue; each thread in \netstar~performs all the tasks including port polling and packet processing. %, while ensuring full asynchrony with low overhead.
+(2) %Since \netstar~is fast has good scalability,
+We use a fast in-memory key-value store, mica \cite{179747}, which has a larger throughput than the RAMCloud database \cite{ousterhout2015ramcloud} used in StatelessNF. %We also implement a custom client library for our NFs to read from and write to mica database. %\chuan{clarify whether this client interface is the same or different from the async-flow interface}.
+(3) In StatelessNF, a unique thread is dedicated to contact RAMCloud for storing the per-flow states; with \netstar, the async-flow objects running in each thread can use the thread-local mica client library to contact mica server concurrently.
+%\netstar~is equipped with a client interface that is created on each client thread \chuan{clarify what each client thread is and what the client interface is}. Since mica is partitioned and different client threads can concurrently read and write to mica,
+
+\vspace{1mm}
+\noindent\textbf{An HTTP reverse proxy.} We use the TCP/IP stack in \netstar~to implement an HTTP reverse proxy, whose functionality is similar to HAProxy (see Sec.~\ref{sec:bro}) and TinyProxy \cite{}: %, acting as a middleman between HTTP clients and servers:
+it intercepts incoming TCP connections from clients, and relays HTTP requests to servers; it then receives HTTP responses from the servers and pushes them back to the clients. %Our proxy implementation leverages the enhancement for creating multiple TCP/IP stacks that we made to Seastar.
+
+\vspace{1mm}
+\noindent\textbf{An IDS that inspects HTTP payload.} This IDS detects potential intrusion from the reconstructed HTTP request payload using our async-flow interface, which is more complicated than the IDS implemented following the StatelessNF. %This IDS is equipped with a preprocessor for reconstructing the TCP byte stream. The core processing logic of the IDS parses converts the reconstructed TCP byte stream into a special input stream, which is fed to the built-in HTTP request parser of Seastar for checking whether the received byte stream contains a valid HTTP request. Once an HTTP request is received, the IDS passes the entire HTTP request payload to the AC automaton \cite{} to detect intrusion. The IDS drops subsequent flow packets if an intrusion is detected, otherwise forwards the packet.
+
+% To compare the performance of this IDS, we re-implement a similar IDS with mOS library \cite{}. We choose mOS because it is the state-of-art library implemented with callback-based event-driven style. We can use an implementation in mOS to evaluate whether NetStar approaches state-of-art performance.
+
+%When the HTTP reregisters reconstructed TCP byte stream  parses the TCP connection states and uses a reordering buffer to reconstruct the TCP bytestream. It parses the bytestream to extract HTTP requests and checks the HTTP request against a malware detection engine.
+
+\vspace{1mm}
+\noindent\textbf{A Malware Detector} as introduced in Sec.~\ref{IDSexample}. %The malware detector is equipped with a preprocessor for generating file hash event on transmitted files over reconstructed TCP byte stream. The core processing logic of the malware detector is implemented according to Fig.~\ref{}.
+ It utilizes the async-flow interface and the TCP/IP stack in \netstar~concurrently. %In particular, we uses the TCP/IP stack to implement a database query interface. For DNS query interface, we re-use existing DNS module in Seastar. We also set up a database server and a DNS server in our cluster for the malware detector to query.

@@ -1,0 +1,136 @@
+\section{NF APIs}
+\label{sec:NFAPIs}
+
+\begin{table}[!t]
+%	\small
+\centering
+\caption{APIs for implementing NFs in \nfactor}
+\label{table:api}
+\resizebox{0.8\columnwidth}{!}{
+\begin{tabular}{l|l}
+\textbf{API} & \textbf{Usage} \\ \hline
+nf.allocate\_shared\_state() & \begin{tabular}[c]{@{}l@{}}Allocate a singleton object\\ containing the shared states.\end{tabular} \\ \hline
+nf.allocate\_new\_fs() & \begin{tabular}[c]{@{}l@{}}Create and initialize a new \\ flow state object. %for a new\\ flow actor
+\end{tabular} \\ \hline
+nf.deallocate\_fs(fs) & \begin{tabular}[c]{@{}l@{}}Deallocate the flow state object\\ upon expiration of the flow actor.\end{tabular} \\ \hline
+$\star$~nf.process\_pkt(input\_pkt, fs, ss) & \begin{tabular}[c]{@{}l@{}}Process the input packet using \\ the current flow states of the flow\\ and the shared states of the NF.\end{tabular} \\ \hline
+nf.flow\_expires(fs, ss) & \begin{tabular}[c]{@{}l@{}}Update the shared states according\\ to final flow states upon \\ expiration of the flow actor.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}nf. flow\_migrate\_out(fs, ss)\\ nf. flow\_migrate\_in(fs, ss)\\ nf. flow\_recover(fs, ss)\end{tabular} & \begin{tabular}[c]{@{}l@{}}Update the shared states using\\ the flow states during flow\\ migration and replication.\end{tabular} \\ \hline
+\end{tabular}
+}
+\end{table}
+
+To create an NF with full resilience support, the programmer should properly implement the APIs listed in Tbl.~\ref{table:api}. We follow two principles when designing these APIs.
+
+{\em First}, StatelessNF \cite{201545} and Split/Merge \cite{rajagopalan2013split} demonstrate that it is possible to build practical NFs by processing each individual flow with its per-flow state and shared state. Inspired by this principle,~\nfactor~employs a core API $process\_pkt(input\_pkt, fs, ss)$ to accomplish the core NF processing logic. It is called by each flow actor when processing the input packet, taking per-flow state and shared state as additional arguments. Several supporting APIs are also provided to manage important NF states. This design %enables us to create several practical NFs for~\nfactor. It also
+ ensures a clean separation between useful NF states and the core processing logic of an NF, so that the flow actor always has direct and efficient access to the latest flow states to ease flow migration and replication.
+
+{\em Second}, to properly handle shared state, we treat shared state accessing by an NF as allocating resource from a shared resource pool. For instance, when a NAT processes a flow, accessing shared state usually means allocating an address from a shared address pool. Therefore, when the flow expires, the resource that the flow acquired should be properly released back to the shared resource pool. With the NAT example, this means that the allocated address should be put back into the address pool when the flow expires. However, when the flow is migrated or recovered on another NF instance, without proper synchronization, the resource obtained by the flow may not be correctly released back to the shared resource pool. To resolve this issue in~\nfactor, the programmer should properly store the allocated resource in the per-flow state. They also need to implement the last four APIs shown in Tbl.~\ref{table:api} for properly releasing the acquired resource so that the shared state is correctly synchronized. Our runtime guarantees that the three APIs are timely invoked during flow migration and replication (Sec.~\ref{sec:management}).
+
+%{\em Third}, cluster contains different runtimes, different runtimes should collectively handle the same task. The implementor should guarantee a correct partition of the shared states across different runtimes
+
+%In the rest of this section, we first discuss how each runtime uses the exposed APIs. Then we discuss the implementation details of four example NFs that we build for~\nfactor. Finally, we discuss the limitation of our current API design.
+
+\subsection{How Runtime Uses the APIs}
+
+When a runtime is created, the shared state of each NF along the configured service chain is initialized by calling $allocate\_shared\_state()$ and stored by a storage actor. After a flow actor is created to process a new flow, it first calls $allocate\_new\_fs()$ to create a flow state for each NF and stores these flow states throughout its lifetime. The flow actor processes a packet along the service chain by sequentially calling $process\_pkt(input\_pkt, fs, ss)$ for each NF, passing in the per-flow state, and shared state obtained from the storage actor. The shared state is sent back to the storage actor when the flow actor finishes processing the packet. When the flow actor expires (this is triggered by a per-actor timer), the flow actor first calls $flow\_expires(fs, ss)$ for each NF to update the shared state and then executes some clean-up procedures, including calling $deallocate\_fs(fs)$ to free the flow state. When a flow is migrated or recovered, the flow actor calls the last three APIs shown in Tbl.~\ref{table:api} to synchronize the flow state with the shared state for each NF, followed by executing some clean-up procedures.
+
+\subsection {Example NFs}
+
+\begin{comment}
+\begin{algorithm}[!t]
+\SetKwProg{Proc}{Procedure}{}{}
+\Proc{load\_balancer.process\_pkt(input\_pkt, fs, ss)}{
+  \If{fs.server = NULL}{
+    {fs.server $\leftarrow$ get\_idlest\_server(ss.server\_list)}\;
+    {increase\_workload\_counter(ss.workload\_list, fs.server)}\;
+  }
+  {send\_packet\_to\_server(input\_pkt, fs.server)}\;
+}
+
+\Proc{load\_balancer.flow\_expires(fs, ss)}{
+  \If{fs.server $\neq$ NULL}{
+    {decrease\_workload\_counter(ss.workload\_list, fs.server)}\;
+  }
+}
+
+\Proc{load\_balancer.flow\_migrate\_out(fs, ss)}{
+  \If{fs.server $\neq$ NULL}{
+    {decrease\_workload\_counter(ss.workload\_list, fs.server)}\;
+  }
+}
+
+\Proc{load\_balancer.flow\_migrate\_in(fs, ss)}{
+  \If{fs.server $\neq$ NULL}{
+    {decrease\_workload\_counter(ss.workload\_list, fs.server)}\;
+  }
+}
+
+\Proc{load\_balancer.flow\_recover(fs, ss)}{
+  \If{fs.server $\neq$ NULL}{
+    {increase\_workload\_counter(ss.workload\_list, fs.server)}\;
+  }
+}
+
+\Proc{nat.process\_pkt(input\_pkt, fs, ss)}{
+  \If{fs.state = no\_nat\_addr}{
+    {fs.nat\_addr $\leftarrow$ allocate\_nat\_addr(ss.addr\_pool)}\;
+    {fs.forward\_5\_tuple $\leftarrow$ get\_5\_tuple(input\_pkt)}\;
+    {fs.reverse\_nat\_addr $\leftarrow$ get\_reverse\_nat\_addr(input\_pkt)}\;
+    {fs.reverse\_5\_tuple $\leftarrow$ get\_reverse\_5\_tuple(input\_pkt, fs.nat\_addr)}\;
+    {notify runtime to forward the flow matching fs.reverse\_5\_tuple to the current flow actor}\;
+  }
+  \If{fs.state = have\_nat\_addr}{
+    \If{match\_5\_tuple(input\_pkt, fs.forward\_5\_tuple)}{
+      {update\_pkt\_header(input\_pkt, fs.nat\_addr)}\;
+    }
+    \If{match\_5\_tuple(input\_pkt, fs.reverse\_5\_tuple)}{
+      {update\_pkt\_header(input\_pkt, fs.reverse\_nat\_addr)}\;
+    }
+    {send\_pkt\_out(input\_pkt)}\;
+  }
+}
+
+\Proc{nat.flow\_expires(fs, ss)}{
+  \If{fs.state = have\_nat\_addr}{
+    {deallocate\_nat\_addr(ss.addr\_pool, fs.nat\_addr)}\;
+  }
+}
+
+\caption{Pseudocode implementation of the APIs for load balancer and NAT}
+\label{algo}
+\vspace{-1mm}
+\end{algorithm}
+\end{comment}
+
+Using these APIs, we create four example NFs, i.e., a firewall, an intrusion prevention system (IPS), a load balancer and a NAT.
+
+%For each received flow packet, the core processing logic of the
+The firewall
+%is to update
+updates the connection information (per-flow state) and compare the 5-tuple of the flow with the access control list (shared state) to decide whether to drop the flow packet. %Within a cluster, the access control list of %the firewall on each runtime has
+%all the firewalls have the same configuration, so that %firewall on each runtime
+%they can collectively block malicious traffic.
+%The core logic of the
+The IPS %is to scan
+scans the packet payload using an automaton (shared state) built with the Aho-Corasick algorithm \cite{aho1975efficient}, saves an index (per-flow state) to the current automaton state, and drops the flow packet if an attack signature is found. %Within a cluster, the Aho-Corasick automaton of all the IPSes %on each runtime also has
+%have the same configuration.
+Since both shared states of the firewall and the IPS are read-only, i.e. the flow only reads the shared state without acquiring any resource from it, there is no need to implement the last three APIs in Tbl.~\ref{table:api} to synchronize the shared state.
+
+%As examples, the pseudocode implementations of the load balancer and the NAT are given in Alg.~\ref{algo}. Within a cluster,
+The load balancer %on each runtime
+forwards each input flow to a server with the smallest workload among a set of backend servers. To achieve this, after selecting a server (per-flow state), the load balancer increases the workload counter (shared state) of the selected server to reflect the load balancing decision. Therefore, when the flow expires, or when the flow is migrated or recovered, the workload counter on that server should be properly decreased by implementing the last three APIs in Tbl.~\ref{table:api}.
+%input traffic to the same set of backend servers. %(lines 1-5 in Alg.~\ref{algo}).
+%When the load balancer processes a flow, the flow increases the workload counter on a server that the flow is directed to. %, acquires an accumulator that contributes to the sum of a workload counter (lines 3-4).
+%Therefore, when the flow expires, or when the flow is migrated or recovered, the workload counter on that server should be properly decreased. to reflect that the flow releases the accumulator (lines 6-17).
+
+The NAT operates by substituting the source IP address and source port of the flow packet with an allocated address (per-flow state) from a shared address pool (shared state).
+%For the NAT (lines 18-33)
+Within a cluster, the address pool of each NAT contains non-overlapping addresses.
+There is no need to implement the last 3 APIs in Tbl.~\ref{table:api}: we treat the address allocation from the address pool as persistent allocation that lasts throughout the lifetime of the flow, i.e., the flow only releases the address back to the address pool when it expires.% (lines 31-34).
+
+% \subsection {Limitation}
+
+% The primary limitation of our current API design is its generality. It may not be suitable to implement all kinds of NFs. However, even with our current API design, we are still able to build four NFs that are widely used in practice. And according to the evaluation result in Sec.~\ref{sec:experiments}, all the implement NFs achieve transparent, high-performance resilience.
+
+%Another limitation of our current prototype is that the shared state should be properly partitioned across different runtimes. For instance, the address pool of a NAT on two different runtimes should be non-overlapping. Otherwise, it is possible for two flows that are processed on different runtimes to use the same allocated address. We plan to design a distributed algorithm to partition shared state under our actor framework.

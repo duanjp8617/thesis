@@ -1,0 +1,374 @@
+\vspace{-3mm}
+\section{Scaling of Data Plane Service Chain}
+\label{sec-dp-scaling}
+
+The DP service chain adopts the same reactive scaling mechanism as discussed in Sec.~\ref{sec:CP_reactivescale}. For proactive scaling, the same steps %proactive scaling protocol
+as shown in Fig.~\ref{fig:proactive-scaling} is followed, with the following differences.
+
+%Duan's new:
+{\em First}, the proactive scaling algorithm for DP service chain, running in Step 3 in Fig.~\ref{fig:proactive-scaling}, not only decides how VNF instances are provisioned in each datacenter, but also updates the service chain path (Sec.~\ref{sec:dp-service-chain-path}) between each entry-exit datacenter pair. The new proactive scaling algorithm will be discussed in Sec.~\ref{sec:dp-proactive-scaling-alg}.
+
+{\em Second}, workload along a DP service chain is described as the number of packets transmitted over each entry-exit datacenter pair every second. The local controller acquires input DP workload using workload measuring OpenFlow rules installed on the SDN switch at each datacenter, and reports DP workload measurements to the global controller every second. Local controllers also constantly measure inter-datacenter delays through a ping test among each other, and report the ping delays to the global controller every second. In Step 1 of Fig.~\ref{fig:proactive-scaling}, not only workload but also delays between datacenters are predicted for the next interval, using the same approach as discussed in Sec.~\ref{sec:CP_proactivescale}.
+
+{\em Next}, each local controller also acts as the SDN controller to manage DP flow routing within the respective datacenter. When a local controller receives DP proactive scaling results in Step 4 of Fig.~\ref{fig:proactive-scaling}, it immediately adds/removes DP VNF instances accordingly, but saves the new DP service chain paths and uses them for routing only after receiving the ``enter new scaling interval'' message in Step 5 of Fig.~\ref{fig:proactive-scaling} (Sec.~\ref{sec:flow-routing-on-dp}).
+%This 2-stage update is used to guarantee consistency for distributed flow routing (see Sec.~\ref{Inconsistency}).
+
+%DP workload is described by the number of the packet sent over each entry-exit datacenter pair every second. Local controller acquires input DP workload by reading workload measuring OpenFlow rules installed on the entry switch (see Sec.\ref{sec:flow-routing-on-dp}). DP workload is reported to the global controller every second. DP proactive scaling algorithm also needs inter-datacenter delay prediction to update service chain paths. It is measured by each local controller through a ping test to every other local controllers and the result is reported to global controller every second.
+
+\vspace{-3mm}
+\subsection{DP Service Chain Path}
+\label{sec:dp-service-chain-path}
+
+%Since the configuration of DP service chain is not specified in the 3GPP specification \cite{3gpp-ims}, \textit{ScalIMS} seeks to find out a generic algorithm that can be applied to any service chain configuration. Under a single-datacenter scenario, the service chain only consists of a list of VNFs that the traffic flow must traverse in sequence. But under the multi-datacenter scenario that \textit{ScalIMS} operates, it is important to consider on which datacenter the traffic flow should go through a specific VNF on the service chain, so that resources on different datacenters could be utilized with more efficiency.
+
+% We refer to VNFs in a DP service chain as {\em stages} of the chain and index them following the order of the VNFs in the chain. For example, DP service chain used in \textit{ScalIMS} contains firewall (stage 1), IDS (stage 2) and transcoder (stage 3). Since \textit{ScalIMS} manages multiple datacenters, we define a {\em service chain path} between each pair of entry-exit datacenters to be a path of datacenters. For a service chain with $m$ stages, a service chain path contains $m+2$ datacenters. The $0$th and $m+1$th datacenter are entry datacenter and exit datacenter of the entry-exit datacenter pair associated with the service chain path. The $i$th datacenter ($i=1, ..., m$) hosts instances of stage $i$ VNF in the service chain. Stage $1$ and stage $m$ could be hosted on other datacenters other than entry and exit datacenter. For example, a service chain path of $(0, 0, 1, 1, 2)$ shows that datacenter 0 is the entry datacenter, stage 1 to stage 3 of the service chain are hosted on datacenters 0, 1, and 1, respectively, and the exit datacenter is datacenter 2. Note that even if instances of a VNF may be deployed on different datacenters, we maintain only one service chain path for each service chain between each entry-exit datacenter pair in each single scaling interval, for path computation efficiency.
+
+\textit{ScalIMS} employs one DP service chain path for all the DP media flows sharing the same entry-exit datacenter pair. A service chain path is a sequence of datacenters $l[0],\ldots,l[m+1]$, where $l[0]$ and $l[m+1]$ are the indexes of the entry datacenter and exit datacenter, respectively, and $l[i], 1\le i\le m$, is the index of the datacenter hosting the $i$th VNF in a $m$-stage service chain.
+%each hosting one VNF in the service chain, ordered in the sequence of VNFs in the service chain, plus the entry and exit data centers. %A service chain path indicates a specific VNF on the DP service chain should hosted on which datacenter for all the DP media flows sharing the same entry-exit datacenter pair.
+For example, the DP service chain in our implementation of \textit{ScalIMS} is ``firewall (stage 1)$\rightarrow$IDS (stage 2) $\rightarrow$ transcoder (stage 3)'', and a service chain path is a sequence of $5$ datacenters. The DP proactive scaling algorithm constantly adjusts the service chain path for each entry-exit datacenter pair, to efficiently utilize deployed VNF instances.
+
+The definition of service chain path augments an actual service chain with a virtual entry stage $0$ and a virtual exit stage $m+1$. These two stages are forced to be placed on the entry and exit datacenter respectively, so that entry and exit datacenters are guaranteed to be connected together. The two virtual stages have infinite capacities.
+
+% and guarantee a bounded end-to-end delay.
+
+%We refer to VNFs in a DP service chain as {\em stages} of the chain and index them following the order of the VNFs on the chain. For example, DP service chain used in \textit{ScalIMS} contains firewall (stage 1), IDS (stage 2) and transcoder (stage 3). For a DP service chain that consists of $m$ stages, a service chain path is defined as a list $l[0...m+1]$ with length $m+2$. Each list item in $l$ is the index of a datacenter controlled by \textit{ScalIMS}. In particular, $l[0]$ and $l[m+1]$ are the indexes of the entry datacenter and exit datacenter, respectively. $l[i], 1 \leq i \leq m$ indicates that datacenter with index $l[i]$ should host stage $i$ VNF for all the DP media flows that share the same entry-exit datacenter pair $(l[0], l[m+1])$.
+
+%The definition of service chain path $l[0...m+1]$ introduces two virtual stages to an actual service chain with $m$ stages, which are the virtual entry stage $0$ and virtual exit stage $m+1$. The virtual entry stage $0$ and virtual exit stage $m+1$ are forced to be placed on the entry datacenter and exit datacenter respectively. Such a representation guarantees that the resulted service chain path connects the entry and exit datacenter together.
+
+
+Each service chain path should satisfy two conditions. (i) Looplessness: if datacenter $i$ hosts both stages $x$ and $y$, $x<y$ on the service chain, then datacenter $i$ must host stage $z$, where $x<z<y$ too; otherwise, a routing loop is created on the inter-datacenter network, which increases end-to-end delay and wastes important inter-datacenetr network bandwidth. There is no need for \textit{ScalIMS} to tackle routing loops inside a datacenter, as routing loops inside datacentres are not common and can be resolved by method described in \cite{stephens2012past}. (ii) Bounded end-to-end delay between the entry datacenter and the exit datacenter along the service chain path, by a pre-defined threshold. %, otherwise DP media flows using this service chain path may experience unexpected high round-trip-time.
+
+\vspace{-3mm}
+\subsection{DP Proactive Scaling Algorithm}
+\label{sec:dp-proactive-scaling-alg}
+
+
+\begin{algorithm}[!t]
+\KwIn{Predicted delay between each datacenter pair, predicted workload of each entry-exit datacenter pair, current VNF deployment, current service chain paths}
+\KwOut{New VNF instance provisioning, new service chain paths}
+{Compute total available processing capacity of instances of each VNF in each datacenter}\;
+\ForEach{entry-exit datacenter pair $p$, $p.entry \neq p.exit$} {% in workload prediction matrix} {
+ 	\If{there is enough VNF capacity on $p$'s current service chain path and the end-to-end delay threshold is not violated along $p$'s current path}{
+		{use $p$'s current service chain path as new path and reduce available processing capacities of VNFs on $p$'s new path by predicted workload}\;
+	}
+}
+\ForEach{$p$, $p.entry \neq p.exit$ $\&\&$ $p$'s new service chain path has not been determined} {
+ 	{compute a new path for $p$ using Alg.~\ref{algo:pc}}\;
+	\If{there is not enough capacity on $p$'s new path}{
+		\ForEach{datacenter $d$ on the new path}{
+		{create $\lceil \max\{0,Q-Q'\}/C \rceil$ new instances of the VNF that datacenter $d$ hosts for $p$, where $Q$ is $p$'s predicted workload, $Q'$ is the total capacity of the VNF in $d$ and $C$ is per-instance processing capacity of that VNF}\; %where sufficient to serve $p$'s predicted workload
+	{reduce available processing capacities of instances of the VNF in $d$ by predicted workload}\;
+	}
+}
+}
+\ForEach{$p$, $p.entry = p.exit$} {
+ 	{use $p$'s current service chain path as new path, and carry out same actions as in line 7-10 }\;
+	%\If{there is not enough capacity on $p$'s new path}{
+	%	{scale out by creating new VNF instances sufficient to serve $p$'s predicted workload}\;
+	%}
+	%{reduct available processing capacities of VNFs on $p$'s new path by predicted workload}\;
+	}
+{scale in by enqueuing un-used VNF instances to the respective buffer queues}\;
+\caption{DP Proactive Scaling Algorithm}
+\label{algo:dpalg}
+\end{algorithm}
+
+%version 1
+The DP proactive scaling algorithm is given in Alg.~\ref{algo:dpalg}, which computes a new service chain path for the next scaling interval, for each entry-exit datacenter pair. % performs scale-out in case of a shortage of VNF processing capacities and reduces the available processing capacities on the service chain path by the predicted workload (lines 1-14).
+The algorithm first tries to reuse as many existing service chain paths as possible based on the current VNF provisioning, as long as the capacity is sufficient to handle predicted workload and the end-to-end delay threshold is still guaranteed (lines 2-4). In case that an existing service chain path can not be reused, a new service chain path is computed using Alg.~\ref{algo:pc} (lines 5-6), and scale-out is carried out if there is a shortage of VNF processing capacities (lines 7-10). For an entry-exit datacenter pair $p$ where the entry and exit datacenters are the same, the entire service chain path of $p$ is always deployed in this datacenter (lines 11-12). %The algorithm processes these entry-exit datacenter pairs at last so that the VNF capacity can be utilized more efficiently (lines 10-14).
+Finally, scale-in is carried out to enqueue un-used VNF instances into the buffer queue (line 13).
+
+
+%For an entry-exit datacenter pair $p$, if there is not enough VNF capacity to serve the predicted workload on $p$'s new service chain, $\lceil (Q-Q')/C \rceil$ new VNF instances are created for the respective VNF in the respective datacenter (whose capacity is in shortage), where $Q$ is $p$'s predicted workload, $Q'$ is the total capacity of the VNF in the respective datacenter and $C$ is the processing capacity of each instance of that VNF (lines 7-8).
+
+
+%In the stage placement algorithm discussed in Sec.~\ref{sec:stage-placement-algorithm}, the virtual entry stage and virtual exit stage both have infinite capacities.
+
+\vspace{-3mm}
+\subsection{Service Chain Path Computation}
+\label{sec:pathcomp}
+
+
+\begin{algorithm}[!t]
+\KwIn{Predicted inter-datacenter delays, an entry-exit datacenter pair $p=(entry, exit)$, $p$'s predicted workload, $p$'s current service chain path, current available processing capacities of VNF instances, the service chain of $m$ stages, $n$ datacenters}
+\KwOut{$p$'s new service chain path}
+{minProvPath = $p$'s current path}\;
+\For{$v = 0, ..., exit-1, exit+1, ..., n-1$}{
+	{$record[0] = entry$, $record[1] = v$, $record[m+1] = exit$}\;
+	\For{$x = 2, ..., m$}{
+		{find out datacenter $v_1$ ($v_1 \neq exit$) that has the largest available capacity for stage-$x$ VNF}\;
+		{$record[x] = v_1$}\;
+  		\If{there is path loop on $record$}{
+   			{eliminate loop by adjusting $record$}\;
+  		}
+		{$path[0, ..., x] = record[0, ..., x]$}\;
+		{$path[x+1, ..., m+1] = exit$}\;
+		%{$path[x+1, ..., m-1] = exit[x+1, ..., m+1]$}\;
+		\If{$path$ leads to a smaller number of new VNF instances to be created for hanlding predicted workload than minProvPath and satisfies end-to-end delay requirement}{
+		 minProvPath = path
+		}
+ 	}
+	{$path[0]=entry, path[1]=v, path[2, ..., m+1] = exit$}\;
+	{check whether $path$ should be assigned to minProvPath as in lines 11-12}\;% and assign it to $minProvPath$ accordingly}\;
+}
+{$path1[0]=entry, path1[1, ..., m+1] = exit$}\;
+{$path2[0, ..., m]=entry, path2[m+1] = exit$}\;
+{check whether $path1$ or $path2$ should be assigned to minProvPath as in lines 11-12}\;%, assign $minProvPath$ accordingly}\;
+\If{minProvPath violates end-to-end delay requirement}{
+ {find out the shortest-delay datacenter path between entry and exit}\;
+ {run stage placement algorithm in Alg.~\ref{algo:sp} and assign the identified service chain path to minProvPath}\;
+}
+\Return{minProvPath}\;
+\caption{Service Chain Path Computation}
+\label{algo:pc}
+\end{algorithm}
+
+\noindent \textbf{Algorithm Overview.} Alg.~\ref{algo:pc} presents the algorithm to compute a good service chain path between a given entry-exit datacenter pair, that aims to minimize the number of new VNF instances to be created %for handling the predicted workload
+ while satisfing the end-to-end delay requirement. % (lines 10 $\sim$ 11).
+ For a service chain of $m$ VNFs (stages) and $n$ datacenters, exhaustive search to identify such a service chain path incurs $O(m^n)$ running time. Instead, Alg.~\ref{algo:pc} seeks to optimistically find a good path in $O(mn)$ time.
+
+In Alg.~\ref{algo:pc}, the $record$ list retains the service chain path under investigation (line 3). The search starts by looping through all datacenters except the exit datacenter, to decide the one for hosting instances of stage-1 VNF %for use of flows between the input entry-exist pairDuan: I think this is enough
+(lines 2-3). For each subsequent VNF in the service chain, a datacenter (except the exit datacenter) with the largest available processing capacity of the respective VNF is chosen (lines 4-6). We might have created a loop in the service chain path. % (see Sec.~\ref{sec:dp-service-chain-path}).
+ If so, the loop is eliminated (lines 7-8) using the method to be discussed next. %in Sec.~\ref{sec:loop-elimination}.
+ Whenever the datacenter to host stage-$x$ VNF is determined, a candidate path is produced by assuming all the rest VNF stages ($x+1,\ldots, m$) will be hosted in the exit datacenter (lines 9-10). The candidate path is examined by calculating the number of new VNF instances to be created along this path and the end-to-end delay of this path. If the candidate path incurs addition of fewer new VNF instances than the current best candidate path while satisfying end-to-end delay requirement, we retain it in $minProvPath$ (lines 11-12). The algorithm also checks some naive candidate paths that are not generated by the search loop (lines 13-17). Finally, it is possible that all candidate paths found so far fail to satisfy the delay requirement. If so, we compute the shortest end-to-end delay path using a shortest path algorithm, and run the stage placement algorithm in Alg.~\ref{algo:sp}  % Sec.~\ref{sec:stage-placement-algorithm})
+  to produce the service chain path (lines 18-20).
+
+\begin{comment}
+	Suppose that Alg.~\ref{algo:pc} is finding a service chain path for entry-exit datacenter pair $(1, 5)$ and the DP service chain consists of $3$ stages. During the execution of the algorithm, the {\em record} list contains $(1, 2, 4, tbd, 5)$. It means the algorithm has determined that instances of stage $1$ VNF should be placed on datacenter $2$ and instances of stage $2$ VNF should be placed on datacenter $4$. And the algorithm is going to find out a datacenter for hosting instances of stage $3$ VNF. If datacenter $2$ is selected to host the stage-$3$ VNF, then the {\em record} becomes $(1, 2, 4, 2, 5)$ and a loop is created between datacenters $2$ and $4$.
+\end{comment}
+
+\vspace{1mm}
+\noindent \textbf{Loop Elimination.}
+%\label{sec:loop-elimination}
+To eliminate a loop in the path introduced in lines 5-6 of Alg.~\ref{algo:pc}, we adjust the {\em record} list following two ways: (i) place all VNF stages involved in the loop on the datacenter at the start of the loop. Suppose the path with loop is $(1, 2, 4, 2, 5)$. It is adjusted to $(1, 2, 2, 2, 5)$, i.e., the datacenter hosting stage $2$ is changed from datacenter $4$ to datacenter $2$. %  Considering the previous example, it means that the record is adjusted to $(1, 2, 2, 2, 5)$ by changing the datacenter hosting stage $2$ from datacenter $4$ to datacenter $2$.
+(ii) Choose a new datacenter to replace the datacenter that leads to the loop, which has the second largest available capacity for hosting the respective VNF and will not create another loop. Suppose datacenter $3$ in the above example has the second largest capacity of stage-$3$ VNF. Then the path is adjusted to %datacenter $3$ replaces datacenter $2$ to host stage $3$ VNF, turning {\em record} list into
+ $(1, 2, 4, 3, 5)$. The {\em record} list is adjusted in both ways and the two resulting lists are compared. The list requiring fewer new VNF instances is selected.
+%Recall that for a service chain with $m$ stages, the service chain path of an entry-exit datacenter pair contains $m+2$ stage, where stage 0 and stage $m+1$ are put on entry and exit datacenter respectively. These 2 stages are virtual stages for delivering traffic and they have infinite capacity.
+
+\begin{algorithm}[!t]
+\KwIn{The shortest-delay datacenter path $d[0...k-1]$ as a list of distinct datacenter indices between entry-exit datacenter pair ($d[0], d[k-1]$)
+; DP service chain with $m+2$ stages (augmented with virtual entry and exit stage discussed in Sec.~\ref{sec:dp-service-chain-path}) and per-instance capacity $C_j, 0 \leq j \leq m+1$, of stage-$j$ VNF; % The service chain is augmented with a virtual entry stage $0$ and a virtual exit stage $m+1$ with infinite capacity (see Sec.~\ref{sec:dp-service-chain-path}).}
+ overall processing capacities $Q'_{i,j}$ of all stage-$j$ VNF instances in datacenter $d[i]$; predicted workload $Q$ for entry-exit datacenter pair $(d[0], d[k-1])$}
+\KwOut{service chain path $l[0], \ldots, l[m+1]$ for entry-exit datacenter pair ($d[0], d[k-1]$).}
+
+%\KwMethod{ Solve the dynamic programming problem listed in Eqn. (1) to (5).
+%}
+
+{Calculate $N(i,j), \forall i=0,\ldots,k-1, j=0, \ldots, m+1$, as follows:
+%\begin{equation}
+%0 \leq i \leq n-1, 0 \leq j \leq m+1
+%\label{eq1}
+%\end{equation}
+\begin{equation}
+\resizebox{0.95\columnwidth}{!}{
+$num(i,j)=
+  \begin{cases}
+    0,                                        &\text{if $Q'_{i,j} \geq Q$ and $m-j+1 \geq k-i-1$}\\
+    \lceil(Q-Q'_{i,j})/C_j\rceil, &\text{if $Q'_{i,j}<Q$ and $m-j+1 \geq k-i-1$}\\
+    +\infty,                                &\text{if $m-j+1<k-i-1$}
+  \end{cases}$}
+ \label{eq6}
+\end{equation}
+\begin{equation}
+N(0, 0) = 0, N(i, 0) = +\infty, i=1,\ldots,k-1 %i \geq 1
+\label{eq2}
+\end{equation}
+\begin{equation}
+N(0, j) =  N(0, j-1)+num(0,j), j=1, \ldots, m+1%j \geq 1
+\label{eq3}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+ N(i, j) = min\{ N(i-1, j-1)+num(i, j), N(i, & j-1) +num(i,j) \}, \\
+ i=1,\ldots,k-1, j=1, \ldots, m+1 %i \geq 1~\text{and}~j \geq 1
+\end{aligned}
+\label{eq5}
+\end{equation}
+}%\;
+
+%{Calculate the rest of the elements in table $N(i,j)$ using Eqn.~\ref{eq3} to~\ref{eq6}}\;
+
+{Backtrack from $N(k-1, m+1)$ to derive the service chain path $l[0], \ldots, l[m+1]$}\;
+
+\Return{$l[0], \ldots, l[m+1]$}\;
+
+\caption{Stage Placement Algorithm}
+\label{algo:sp}
+\end{algorithm}
+
+\vspace{1mm}
+\noindent\textbf{Stage Placement Algorithm.} Alg.~\ref{algo:sp} gives the stage placement algorithm used in line 20 of Alg.~\ref{algo:pc}, which calculates a service chain path, i.e., the sequence of datacenters to host VNF stages on the service chain, that minimizes the number of new VNF instances to be created on the path. %The resulting service chain path must traverse all the datacenters on the datacenter path in sequence without creating a routing loop.
+
+In Alg.~\ref{algo:sp}, $num(i, j)$ is the number of new stage-$j$ VNF instances to be created, if stage $j$ is to be deployed on datacenter $d[i]$. $num(i, j)$ is computed in Eqn.~\ref{eq6} based on the following observation: if datacenter $d[i]$ is chosen to host stage $j$, then the remaining number of yet-to-be-placed stages, $(m+2)-(j+1)$, must be no smaller than the remaining number of datacenters which do not host any stage yet, $k-(i+1)$, as otherwise the resulting service chain is not able to traverse the shortest-delay datacenter path in sequence. %The third condition in Eqn.~(\ref{eq6}) reflects this observation, where as the first two conditions in Eqn.~(\ref{eq6}) are calculated as usual.
+
+$N(i, j)$ is the minimum number of instances of stage $0$ to stage $j$ VNFs, if stage $j$ is to be deployed on datacenter $d[i]$. The computation of $N(i, j)$ is a dynamic programming problem (Eqn.~(\ref{eq2}) to~(\ref{eq5}) in Alg.~\ref{algo:sp}). Eqn.~(\ref{eq2}) to Eqn.~(\ref{eq3}) are base cases, initialized according to the fact that stage $0$ is on the entry datacenter $d[0]$. Eqn.~(\ref{eq5}) is derived based on the following observation: if datacenter $d[i]$ is chosen to host stage $j$, then stage $j-1$ can only be hosted on either datacenter $d[i-1]$ (the previous datacenter on the datacenter path) or datacenter $d[i]$.
+
+%If this observation is violated, then the resulted service chain path may not traverse the datacenter path in sequence. %Based on this observation, $N(i-1,j-1)+num(i,j)$ is the smallest number of newly created VNF instances if stage $j-1$ is hosted on datacenter $d[i-1]$, where as $N(i,j-1)+num(i,j)$ is the smallest number of newly created VNF instances if stage $j-1$ is hosted on datacenter $d[i]$, and $N(i,j)$ is the minimum value among the two.
+
+
+ %Line 3 of Alg.~\ref{algo:sp} backtracks from $N(n-1, m+1)$ because the virtual exit stage $m+1$ can only be placed on exit datacenter $d[n-1]$.
+%\chuan{explain how to backtrack from $N(n-1, m+1)$ to derive the service chain path $l[0], \ldots, l[m+1]$, as stated in Line 3 of Alg.~\ref{algo:sp}}.
+
+When calculating $N(i,j)$ in Eqn.~(\ref{eq5}), we can construct a link connecting $N(i, j)$ to either $N(i-1, j-1)$ or $N(i, j-1)$, depending on whether $N(i-1, j-1)+num(i,j)$ or $N(i, j-1)+num(i,j)$ is smaller. This indicates whether datacenter $d[i-1]$ or $d[i]$ should host stage $j-1$, if stage $j$ is to be deployed on datacenter $d[i]$. After $N(k-1, m+1)$ is computed (recall stage $m+1$ must be placed on the exit datacenter $d[k-1]$),  we can backtrack to obtain the best service chain path.
+
+
+%\label{sec:stage-placement-algorithm}
+
+
+
+%The Input of the algorithm contains:
+
+%\textbf{First,} the datacenter path $d[0...n-1]$ as a list of mutually distinct datacenter indexes. It is the datacenter-to-datacenter path between entry-exit datacenter pair ($d[0], d[n-1]$) with the shortest delay.
+
+%\textbf{Second,} the DP service chain with $m$ stages and the capacity $C_j, 1 \leq j \leq m$ of stage $j$ VNF. Note that when calculating the service chain path, the service chain is augmented with a virtual entry stage $0$ and a virtual exit stage $m+1$ with infinite capacity (see Sec.~\ref{sec:dp-service-chain-path}).
+
+%\textbf{Third,} the total processing capacities $Q'_{i,j}$ of all stage $j$ VNF instances on datacenter $d[i]$ and the predicted workload $Q$ for the entry-exit datacenter pair $(d[0], d[n-1])$.
+
+%\textbf{The Output} of the algorithm is the service chain path $l[0...m+1]$ for the entry-exit datacenter pair ($d[0], d[n-1]$) that minimizes the the number of newly created VNF instances for serving the predicted workload. The service chain path must traverse all the datacenters on the datacenter path in sequence without creating a routing loop.
+
+%The stage placement algorithm is solved using the following equations that describe a dynamic scaling problem.
+
+\begin{comment}
+\begin{equation}
+0 \leq i \leq n-1, 0 \leq j \leq m+1
+\label{eq1}
+\end{equation}
+\begin{equation}
+N(0, 0) = 0, N(i, 0) = +\infty, i \geq 1
+\label{eq2}
+\end{equation}
+\begin{equation}
+N(0, j) =  N(0, j-1)+num(0,j), j \geq 1
+\label{eq3}
+\end{equation}
+\begin{equation}
+\resizebox{\columnwidth}{!}{$N(i, j) = min\{ N(i-1, j-1)+num(i, j), N(i, j-1)+num(i,j) \}$},\nonumber\\
+\label{eq4}
+\end{equation}
+\begin{equation}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~i \geq 1~\text{and}~j \geq 1
+\label{eq5}
+\end{equation}
+\begin{equation}
+\resizebox{\columnwidth}{!}{
+$num(i,j)=
+  \begin{cases}
+    0, \text{if $Q'_{i,j} \geq Q$ and $m-j+1 \geq n-i-1$}\\
+    \lceil(Q-Q'_{i,j})/C_j\rceil, \text{if $Q'_{i,j}<Q$ and $m-j+1 \geq n-i-1$}\\
+    +\infty, \text{if $m-j+1<n-i-1$}
+  \end{cases}$}
+ \label{eq6}
+ \end{equation}
+\end{comment}
+
+%We note that we do not take available inter-datacenter bandwidth into consideration in our scaling algorithms, given that inter-datacenter bandwidth should be sufficient for our NFV system since the datacenters are hosting many more services than ours.
+
+\vspace{-3mm}
+\subsection{Flow Routing On Data Plane}
+\label{sec:flow-routing-on-dp}
+
+
+%The DP media flows are routed in a distributed fashion between the entry and exit datacenters. We use a DP media flow sent by the caller to illustrate the distributed routing process in this section.
+Each DP media flow enters the system from the entry datacenter, is routed through the datacenters on its service chain path in a fully distributed fashion, and then departs from the exit datacenter. The DP media flow sent by the caller is used as an example to explain the distributed routing process in the following paragraphs. %Inside each datacenter along the path, the local controller obtains the service chain path by inspecting a special tag in the header of packets of the flow and routes the flow across a sequence of VNF instances for VNF stages hosted on the datacenter. Finally, the flow is either sent to the next datacenter along the service chain, or exit the DP service chain from the exit datacenter (Sec. \ref{sec:exit-sc}).
+
+\vspace{1mm}
+\noindent\textbf{Enter Service Chain Path.}
+%\label{sec:enter-sc}
+The caller learns an IP address located in his entry datacenter %\chuan{is this IP address of P-CSCF instance? If so, just say `learns IP address of a P-CSCF instance in his ...'}
+when the SIP OK message is received (Sec.~\ref{sec:message-routing-on-control-plane}). This IP address is used as the destination IP address to send the DP media flow to the entry datacenter. %, from where the flow enters the DP service chain.
+
+\vspace{1mm}
+\noindent\textbf{Route through Service Chain Path.}
+%\label{sec:follow-sc}
+The local controller in a datacenter decides the service chain path used by a media flow, when the first packet of the flow arrives at the datacenter and triggers an OpenFlow Packet\_IN message at the local controller. The local controller examines whether the packet header contains a special tag. In our implementation of \textit{ScalIMS}, the tag is added to the destination port field by a special OpenFlow rule in the flow's entry datacenter. The tag contains the indices of the flow's entry and exit datacenters, and the current scaling interval number modulo 4. % (to be explained in Sec.~\ref{Inconsistency}).
+
+If the special tag is not present, it indicates that %the flow is sent by the caller and
+ this datacenter is the entry datacenter of the flow. Then the local controller uses the mapping 1 in Table~\ref{mappings}, saved during the SIP INVITE transaction, to get the callee IP address %\chuan{should it be `destination IP address of the callee' or `IP address of the caller'?}
+ and obtains the index of the flow's exit datacenter using the location service (Sec.~\ref{System-Design}). The local controller then selects the service chain path corresponding to the flow's entry-exit datacenter pair, recorded for the current scaling interval.  %and routes the flow by installing OpenFlow rules (to be discussed next).
+ If there is one or multiple VNF stages hosted in this entry datacenter, the local controller selects a sequence of VNF instances for those VNF stages, according to a smallest workload-first principle for load balancing. Next, it installs several OpenFlow rules on the SDN switches in the datacenter, to route the flow along the selected sequence of VNF instances. The installed OpenFlow rule will also add the special tag to the header of all incoming packets of the flow. %encoded using the destination port field in the current \textit{ScalIMS} implementation.
+ If the datacenter is not the exit datacenter, the flow is then routed to the next datacenter on the service chain path, through a VxLAN tunnel, that is set up between each pair of datacenters. Each VxLAN tunnel connecting a pair of datacenters is constructed over the inter-datacenter network connecting that pair of datacenters. Different service chain paths share the same VxLAN tunnel if they need to traverse the same pair of datacenters.
+
+
+If the special tag is present, the datacenter hosts VNF stage(s) on the service chain path. %The local controllers on subsequent datacenters of the service chain path inspect the packet header.
+The local controller selects the service chain path indicated in the tag. Then it selects VNF instance(s) for the VNF stage(s), installs OpenFlow rules to route the flow through the instance(s), and routes flow out to the next datacenter (if it is not the exit datacenter), in the same way as discussed in the previous case. The use of the special tag ensures that each flow is routed through a consistent service chain path.
+
+%In the entry datacenter, the local controller maps the caller's source IP and source port to the callee's source IP using the first mapping in Table~\ref{mappings}. Using the location service, the local controller also gets to know the exit datacenter of this flow and can then identify the service chain path of the entry-exit datacenter pair for the current scaling interval. In order for local controllers in  subsequent datacenters in the service chain path to learn about the service chain path, the local controller in the entry datacenter adds a tag to the header of packets in the flow (encoded using the destination port field in our implementation). The tag contains the index of the flow's entry datacenter, the index of the flow's exit datacenter and the current scaling interval number modulo 4. Since a local controller only needs to check whether the encoded scaling interval is the previous interval, the current interval or the next interval, we encode the current scaling interval number modulo 4 (only two bits are needed to represent the scaling interval). Local controllers in subsequent datacenters learn the service chain paths for each entry-exit pair as in step 4 of  Sec.~\ref{sec:CP_proactivescale}. %\hl{They will use the information contained in the tag to correctly retrieve the service chain path used by the flow} (see Sec.~\ref{Inconsistency}).
+%The index of flow's entry and exit datacenter is used to identify flow's entry-exit pair. The scaling interval indicates under which scaling interval the flow is processed by the local controller on entry datacenter. It is an inevitable because service chain path might get updated under different scaling intervals and \textit{ScalIMS} must ensure consistency of the service chain path of this flow (see Sec.~\ref{Inconsistency}).
+
+
+
+%The tag is encoded into flow's packet header (we use destination port in our implementation). We only assume that the scaling system controls tens of datacenters. So we encode the full value of entry/exit datacenter index to the destination port. The reason that we mod scaling interval by 4 is two folds. First, it decreases the the number of bits that are used to encode scaling interval to only 2 bits. Second, we will see in Sec.~\ref{Inconsistency} that we only need to check whether the encoded scaling interval is the previous interval, the current interval or the next interval. And 2 bits are enough to make this differentiation.
+%If the datacenter is not flow's entry datacenter, but an intermediate datacenter on flow's service chain path, then the local controller on the intermediate datacenter could not directly determine which entry-exit pair this flow belongs to, because the mapping information is only saved on flow's entry datacenter. In order to solve this problem, the local controller on flow's entry datacenter will add a tag to flow's IP header, indicating which entry-exit pair the flow belongs to, and in which scaling interval the flow is processed. After the tagging, when flow reaches an intermediate datacenter, the local controller on intermediate datacenter could use the entry-exit pair and scaling interval contained in the flow tag to determine which service chain path the flow should use.
+
+%\vspace{1mm}
+%\noindent\textbf{Route through a Sequence of VNF instances.}
+%\label{sec:choose-vnf}
+%After the service chain path is decided, the local controller selects a sequence of VNF instances for VNF stages hosted on its datacenter, according to a smallest workload-first principle for load balancing. Several OpenFlow rules are installed on the SDN switches by the local controller to route the flow along the selected sequence of VNF instances. If the datacenter is not the exit datacenter, the flow is then routed to the next datacenter on the service chain path, through a VxLAN tunnel~\cite{vxlan} that is set up between each pair of datacenters.
+
+%The installed OpenFlow rule mentioned in previous section also encodes the selected sequence of VNF instances in the current datacenter to the destination IP address field of all the flow packets. The flow packets are then automatically routed across the selected sequence by matching the destination IP address field of each packet.
+
+%This is achieved by encoding the routing information into the flow's packet header by the installed OpenFlow rule mentioned in previous section.
+
+%inside the datacenter. The local controller selects a sequence of VNF instances for each stage that is hosted on the current datacenter according to a smallest-workload-first criteria. To enable the flow to go through the selected VNF instances, the local controller encodes the routing information in flow's packet's destination IP address field in the current \textit{ScalIMS} implementation.
+
+%To fulfill this task, the local controller first selects VNF instances for each stage of the flow's service chain, that
+%, it selects VNF instances for each stage of the flow's service chain, that is deployed in the datacenter, for the flow to traverse, according to a smallest-workload-first criteria. It enables the flow to go through selected VNF instances by encoding routing information in the flow's packet header too (using the destination IP address field in our implementation).
+
+
+
+%A static flow rule is installed on the switch that each VNF instance's entry NIC connects to. In \textit{ScalIMS}, flow rules installed for stage-$i$ $(i=1, ..., 3)$ VNF instances match selected bits in the destination IP address with a mask of $255<<8*(4-i)$. If the matched bits equal the index of a VNF instance, then the flow is sent to the corresponding VNF instance.
+%The matched bits for NF instances from different stages do not overlap, so we can encode the index of the each selected NF instance to the corresponding bits on packet header.
+
+%In \textit{ScalIMS}, if the flow has passed through stage $i$ $(i=1, ..., 3)$ VNF and is going to another datacenter for further processing, we fill the matched bits with a mask of $255<<8*[4-(i+1)]$ by the index of the next datacenter. Note that the mask $255<<8*[4-(i+1)]$ is the mask for stage $i+1$ ( If $i=3$, we treat stage $4$ as an virtual exit stage that is always deployed on exit datacenter, with details in first difference at start of Sec.~\ref{sec-dp-scaling}). When the flow comes out of the exit NIC of the last processing stage in the current datacenter, a pre-installed static rule automatically routes the flow to the next datacenter through a VxLAN tunnel~\cite{vxlan}, if the matched bits indicate the index of the next datacenter.
+
+\vspace{1mm}
+\noindent\textbf{Exit from Service Chain Path.}
+%\label{sec:exit-sc}
+At the exit datacenter, the local controller uses mapping 4 in Table~\ref{mappings} to retrieve the IP address on callee's entry datacenter, callee IP and callee's receive port. If the exit datacenter also hosts VNF stage(s) in the service chain, the flow is routed through the VNF instance(s). %After the flow traverses the selected VNF instances on the exit datacenter,
+Then the local controller uses an OpenFlow rule to perform an address translation, which replaces the flow's source IP address by the IP address on callee's entry datacenter, flow's destination IP address by the callee IP, and flow's destination port by the callee's receive port. The flow is then delivered to the callee over the Internet.
+
+%When the flow has been processed by VNFs of all stages, it exits from the DP service chain path. To send the flow to the callee, the local controller in the exit datacenter maps the caller's source IP and source port to the callee's entry IP, callee IP, callee receive port according to the fourth mapping in Table~\ref{mappings}.  Then an address translation is carried out to substitute the caller's source IP by the callee's IP, the caller's destination IP by the callee's IP, and the caller's destination port by the callee's receive port.
+
+\vspace{-3mm}
+\subsection{Handling Scaling Interval Inconsistency}\label{Inconsistency}
+
+%DP flow routing consists of 3 conditions, which are routing at entry datacenter, routing at intermediate datacenter and routing at exit datacenter. We use DP traffic flow sent by caller to illustrate the DP flow routing. The same process could be mirrored on DP traffic flow sent by callee.
+
+%\textbf{Routing at Entry Datacenter:} DP traffic flow sent by caller will first arrive at entry datacenter and it will trigger an OpenFlow PACKET\_IN message to the local controller. The local controller will use source IP and source port of the flow packet to acquire callee IP from the mapping saved during INVITE transaction processing. Using the location service, the local controller learns about flow's exit datacenter. Local controller can then acquire the DP service chain path for the current scaling interval using entry-exit pair of this flow. We will then install flow rules to route the DP traffic flow through all required stages on entry datacenter.
+
+
+
+%\textit{Tagging: }DP flow must go through the first stage network function on entry datacenter. The flow rule that we install to route the flow to the first stage network function will add a tag to flow packets' IP headers. The tag consists of 3 parts, which are the scaling interval on entry datacenter, index of flow's entry datacenter and index of flow's exit datacenter. We encode information of the tag to the destination IP address of flow packets by installing a FLOW\_MOD rule that modifies the destination IP address of flow packet.
+
+%We only assume that the scaling system only controls tens of datacenters. So we encode the full value of entry datacenter index and exit datacenter index to the IP header. But for the scaling interval, the actual value that we encoded into the IP header is the current scaling interval value mod by 4. The reason that we mod scaling interval by 4 is 2 folds. First, it decreases the the number of bits that are used to encode scaling interval value to only 2. Second, we will see in the following text that we only need to check whether the encoded scaling interval is the previous interval, the current interval or the next interval. And 2 bits are enough to make this differentiation.
+
+%If DP service chain path indicates that the flow should go to another datacenter for future processing, then we will add a flow rule to direct the flow to the corresponding inter-datacenter tunnel. The flow will come out from the other end of the tunnel and being processed by another local controller independently.
+
+%\textbf{Routing at Intermediate Datacenter:}
+
+In Step 5 of Fig.~\ref{fig:proactive-scaling}, the global controller sends an `enter new scaling interval' message to all local controllers to advance the scaling interval index on each local controller by 1. Due to network delay, the local controllers may not receive the message at the same time, resulting in temporary inconsistency of scaling interval indices on different local controllers.
+
+When a local controller %on subsequent datacenters of flow' service chain path
+is processing a flow, it may find that the encoded scaling interval in the header of the received flow packets does not match its current scaling interval index: one scaling interval ahead, or one scaling interval behind. In the first case, since the service chain paths for the next scaling interval are broadcast and saved at all local controllers before the `enter new scaling interval' message can be sent and received by any local controller, the current local controller must have received the service chain paths for the next scaling interval, though not yet receiving the `enter new scaling interval' message; it can use the service chain path for the next scaling interval to route the flow. In the second case, %since the local controller always keeps the service chain paths used for the previous scaling interval,
+the local controller still uses the service chain path for the previous scaling interval to route the flow.
+
+Since the difference between the scaling interval in the tag of received flow packets and the scaling interval on a local controller is among $-1, 0,$ and $1$, the scaling interval encoded in the tag is the actual value modulo 4, to reduce the number of bits required to only 2.
+
+%In either case, the local controller always stick to the service chain paths recorded for the earlier scaling interval: use paths for its current scaling interval if encoded interval is larger, or use those for the pervious scaling interval if the encoded interval is smaller.   % even if the encoded scaling interval is one behind the current scaling interval.
+% In Step 4 of Fig.~\ref{fig:proactive-scaling}, the service chain paths for the next scaling interval are sent to each local controller before the ``enter new scaling interval'' message is sent. Therefore, a consistent service chain path is always used. % even if the encoded scaling interval is one ahead of the current scaling interval.
+
+
+\begin{comment}
+For example, suppose local controller 1 has received `enter new scaling interval' message and local controller 2 has not received it. %Before local controller 2 receives `enter new scaling interval message',
+Local controller 1 becomes 1 scaling interval ahead of local controller 2 for a short time window. Suppose that at this time, a flow enters the service chain from local controller 1's datacenter and is immediately sent to local controller 2's datacenter during this short time window. Then local controller 2 will find that the encoded scaling interval in the flow's packet header is one scaling interval ahead of its current scaling interval. But if flow 1 enters service chain from local controller 2's datacenter and is sent to to local controller 1's datacenter during this short time window, then local controller 1 will find that flow's encoded scaling interval is one scaling interval behind its current scaling interval.
+\end{comment}
+ %Even though all local controllers will finally reach the same scaling interval after all of them have received enter new scaling interval message, they will not receive this message simultaneously. This leads to inconsistency about which scaling interval the local controller is currently on during the execution of proactive scaling.
+
+
+
+
+%Since DP service chain paths might change under different scaling intervals,
+%three sets of service chain paths are always retained in each local controller during the execution of proactive scaling, for the previous, current and next scaling intervals, respectively. %The proactive scaling workflow guarantees that all local controllers learns about service chain paths for next scaling interval before inconsistency happens (step 4 in Sec.~\ref{sec:CP_proactivescale}). After local controller receives enter new scaling interval message, it replaces previous interval paths with current interval paths and current interval paths with next interval paths.
+ %When a local controller receives a new flow, it uses one of the service chain paths depending on the scaling interval encoded in the header of the flow packets.
+
+%\textbf{Routing at Exit Datacenter:} If the DP service chain path suggests that caller DP flow will go through the last stage on this datacenter, then caller traffic flow will exit from this datacenter and get routed to the callee. The local controller on the exit datacenter will retrieve callee entry IP and callee IP from the mapping saved during INVITE transaction processing. When the flow comes out from last stage network function, a flow rule will transform caller flow's source IP to callee entry IP and destination IP to callee IP. Then the flow will be routed towards the callee.
