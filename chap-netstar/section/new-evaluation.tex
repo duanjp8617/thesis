@@ -222,7 +222,7 @@ On the other hand, 493 LOC are written to implement the core processing logic in
 \begin{table}[!h]
 \centering
 \caption{Performance of Malware Detectors}
-\label{table:stat}
+\label{table:malware-detector-stat}
 \resizebox{\columnwidth}{!}{
 \begin{tabular}{|l|l|l|l|l|}
 \hline
@@ -237,7 +237,7 @@ On the other hand, 493 LOC are written to implement the core processing logic in
 We compare our asynchronous malware detector that queries an external database and a DNS server (run in the same cluster as the malware detector) with a local malware detector that only tries to identify if the file hash exists in a local in-memory malware hash table. Both malware detectors are implemented using \netstar.
 We generate 1000 HTTP connections and send files in these HTTP connections from the client to the server. We randomly populate the content of the file with malware. The size of the files vary from 8K bytes to 32K bytes. Both malware detectors run using one thread.% without multi-core scaling.
 
-In Table~\ref{table:stat}, % shows the throughput and average HTTP transaction completion time achieved by both malware detectors.
+In Table~\ref{table:malware-detector-stat}, % shows the throughput and average HTTP transaction completion time achieved by both malware detectors.
  we can see that compared with a local version, the asynchronous malware detector experiences a 14\% throughput drop when the size of the transmitted file is 8K and 8.8\% throughput drop when the size of the transmitted file is 32K. The remote malware detection process adds a 1.97ms/3.48ms latency respectively. %Throughout the evaluation, all the generated malwares are successfully detected.
 
 We purposely compare a malware detector accessing external services with a local malware detector, instead of a callback-based malware detector which also accesses external services, in order to show the following: our NF's performance is very comparable with a fast local detector, not to mention one accessing external services; with \netstar, complicated asynchronous operations can be enabled on NFs without large performance drop, and the future/promise abstraction provided by \netstar~enables easy implementation of the asynchronous operations.

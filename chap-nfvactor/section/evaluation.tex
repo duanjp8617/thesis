@@ -31,7 +31,6 @@ We use a single server to generate the traffic. We set up 6 virtual switches on 
     \caption{}\label{fig:micro_mp}
   \end{subfigure}
 \caption{Performance of the Runtime.}
-\label{fig:mig-perf}
 \end{figure}
 
 \subsubsection{Packet processing throughput and latency}
@@ -149,7 +148,6 @@ Table \ref{table:recover} shows the average recovery time of 6 replication targe
    \caption{}\label{fig:migration_time}
   \end{subfigure}
 \caption{Flow migration completion time.}
-\label{fig:mig-perf}
 \end{figure}
 
 We first compare flow migration performance among \nfactor, libcaf runtime, and OpenNF. Both \nfactor~and libcaf runtime run the example firewall. We also port the example firewall to work with OpenNF. We send the same number of flows to the three firewalls and each flow has a 10pps packet rate. In Fig.~\ref{fig:migration_compare}, the time to migrate the respective number of flows is much smaller with \nfactor~(0.7ms for 500 flows and 1.5ms for 1000 flows), when compared to OpenNF (101ms for 500 flows and 217ms for 1000 flows) and the libcaf runtime (59ms for 500 flows and 105ms for 1000 flows). Due to efficient runtime design, \nfactor~can out-perform OpenNF by 144 times when migrating 1000 flows.
