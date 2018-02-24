@@ -2,7 +2,7 @@
 
 %\noindent \textbf{Motivation.}
 %The key motivation of this study is the fact that there are no NFV scaling systems designed to operate under a multi-datacenter environment, given the following new challenges compared with scaling service chains within a single datacenter.
-\textit{ScalIMS} aims to address the following challenges, that arise when scaling service chains over multiple data centers.
+\textit{ScalIMS} aims to address the following challenges, that arise when scaling service chains over multiple datacenters.
 
 {\em First, deciding service chain paths}, as determined by the datacenters where instances of VNFs in a service chain should be deployed. The service chain path critically decides service quality of user traffic along the chain.
 For instance, a traffic flow sent by a user of the IMS system to another user may have two optional paths. The first path traverses a sequence of datacenters $(a, c)$ while the second path traverses datacenters $(a, b, c)$. %Due to the triangle inequality which is a common phenomena in computer network \cite{wang2007towards}, it is possible that the accumulated delay on the second path is way smaller than that on the first path.
@@ -16,7 +16,6 @@ The end-to-end delays on the two paths may vary over time. A multi-datacenter NF
 When a service chain path traverses multiple datacenters, it is difficult for a single controller to control the end-to-end route. % due to the lack of support for SDN-like mechanisms over the WAN.
  When multiple SDN controllers are employed in different datacenters, they should work in coordination on constant updates of service chain paths, and correctly route user traffic towards destinations.
 
-\vspace{1mm}
 %\noindent\textbf{Highlights of {\em ScalIMS}.}
 We make the following design decisions in \textit{ScalIMS}. A functional overview of \textit{ScalIMS} is given in Fig.~\ref{fig:system-overview}.
 

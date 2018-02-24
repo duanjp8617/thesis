@@ -46,10 +46,8 @@ IDS        & 20000 pkts/s & 90\%                                                
 Transcoder & 15000 pkts/s & 90\%                                                     & 50\%                                                       & 15000 pkts/s                                                     \\ \hline
 \end{tabular}
 }
-\vspace{-5mm}
 \end{table}
 
-\vspace{-3mm}
 \subsection{Evaluation in IBM SoftLayer Cloud}
 
 We evaluate the performance of \textit{ScalIMS} on IBM SoftLayer Cloud~\cite{softlayer} by renting one bare-metal server in each of the 4 Softlayer datacenters, located in Tokyo, Hong Kong, London and Houston, respectively. Each server is equipped with two 6-core 2.4GHz Intel CPU, 64GB RAM, and 1TB SATA disk. In the SoftLayer cloud, servers in different datacenters are connected through a global private network~\cite{softlayer}, which provides a Gigabyte throughput. \textit{ScalIMS} creates a VxLAN tunnel mesh in the private network to route DP traffic. CP VNFs are connected directly over the private network. The difference in the connection method is because CP VNFs are addressable at L3 layer (IP layer) whereas DP VNFs are only addressable at L2 layer (Ethernet layer).
@@ -73,13 +71,7 @@ We evaluate the performance of \textit{ScalIMS} on IBM SoftLayer Cloud~\cite{sof
 %In order to compare the performance of \textit{ScalIMS} with different scaling strategies,
 We compare the performance achieved by using proactive scaling only (the local controller does not react to overload of instances), reactive scaling only (the global controller initializes a good set of service chain paths, but no subsequent proactive scaling decisions are sent to local controllers), and both proactive and reactive scaling enabled ({\em i.e.}, the combined scaling strategy of \textit{ScalIMS}). The reactive-scaling-only is the base-line case as the reactive scaling used by \textit{ScalIMS} inside a single datacenter is similar to that of \cite{gember2012stratos, palkar2015e2}. Each scaling interval is set to be 50 seconds long, and each buffer queue retains an unused VNF instance for at most 10 scaling intervals. The maximum allowed end-to-end flow delay is 250ms.
 
-\subsubsection{Simultaneous Start}
-
-In this set of experiments, each traffic generator starts generating users simultaneously at the rate of $1~users/s$, which gradually increases to $15~users/s$ and then decreases to $6~users/s$. The rate change happens once every \textit{change interval}. The duration of change intervals is set to different values in different experiments.
- %All the traffic generators will start generating users simultaneously at the start of the experiment run,
-In this way, the peak workload arrives at each datacenter almost concurrently. %The duration of a change interval is set to 20s, 30s, ... 80s respectively.
-
-\begin{figure}[!t]
+\begin{figure}[!h]
   \begin{subfigure}[t]{0.49\linewidth}
    \centering
    \includegraphics[width=\columnwidth]{chap-scalims/figure/nf-creation1.eps}
@@ -90,21 +82,18 @@ In this way, the peak workload arrives at each datacenter almost concurrently. %
     \end{subfigure}
         \caption{Overall number of new VNF instances created: (a) simultaneous start; (b) asynchronous start.}
         \label{fig:nf-creation}
-        \vspace{-4mm}
 \end{figure}
-%(\chuan{Fig.~\ref{fig:nf-creation}(b): in y labels, instance should be instances'})
 
+\subsubsection{Simultaneous Start}
 
-\begin{figure}[!t]
+\begin{figure}[!h]
         \centering
         \includegraphics[width=\columnwidth]{chap-scalims/figure/syn-lossrate-rtt.eps}
         \caption{QoS of DP flows: simultaneous start.}
         \label{fig:syn-lossrate-rtt}
-        \vspace{-4mm}
 \end{figure}
 
-
-\begin{figure}[!t]
+\begin{figure}[!h]
   \begin{subfigure}[t]{0.49\linewidth}
    \centering
    \includegraphics[width=\columnwidth]{chap-scalims/figure/syn-cp1.eps}
@@ -115,8 +104,13 @@ In this way, the peak workload arrives at each datacenter almost concurrently. %
     \end{subfigure}
 \caption{QoS of CP flows: simultaneous start.}
 \label{fig:syn-cp}
-\vspace{-5mm}
 \end{figure}
+
+In this set of experiments, each traffic generator starts generating users simultaneously at the rate of $1~users/s$, which gradually increases to $15~users/s$ and then decreases to $6~users/s$. The rate change happens once every \textit{change interval}. The duration of change intervals is set to different values in different experiments.
+ %All the traffic generators will start generating users simultaneously at the start of the experiment run,
+In this way, the peak workload arrives at each datacenter almost concurrently. %The duration of a change interval is set to 20s, 30s, ... 80s respectively.
+
+%(\chuan{Fig.~\ref{fig:nf-creation}(b): in y labels, instance should be instances'})
 
 Fig.~\ref{fig:nf-creation}(a) shows that the total number of VNF instances provisioned (for both CP and DP service chains) does not differ much under the three schemes. Since the maximum workload on each datacenter arrives at around the same time, the proactive scaling algorithm has no opportunity to decrease the number of provisioned VNF instances by adjusting the service chain path, and therefore the numbers are similar.
 
@@ -133,7 +127,10 @@ Fig.~\ref{fig:syn-cp} shows that the average SIP transaction completion time is 
 %To evalaute the impact of the overload threshold in reactive scaling, we conduct another set of experiments by running pure reactive scaling with thresholds set to 80\% of the default overload detection threshold. The results are shown as ``reactive 80\%" in Fig.~\ref{fig:syn-lossrate-rtt} and Fig.~\ref{fig:syn-cp}. We observe that even though decreasing the threshold improves the quality of the user traffic, the quality is still worse than the combined approach.% letting alone the additional created VNF instances during the experiment.
 
 %Figure~\ref{fig:syn-cp} shows CP user traffic quality and performance of the 3 approaches are similar. First, CP scaling is not triggered very often as compared to DP, because CP VNF is able to handle a large amount of SIP transactions. Second, the overload threshold for CP VNF is set to a smaller value (70\% of the overload threshold), due to the fact that we observe constant CP VNF crash when CP VNF is on brink of overloading.
-\begin{figure}[!t]
+
+\subsubsection{Asynchronous Start}
+
+\begin{figure}[!h]
   \begin{subfigure}[t]{0.49\linewidth}
    \centering
    \includegraphics[width=\columnwidth]{chap-scalims/figure/nonsyn-rttloss1.eps}
@@ -144,37 +141,29 @@ Fig.~\ref{fig:syn-cp} shows that the average SIP transaction completion time is 
     \end{subfigure}
 \caption{QoS of DP flows: asynchronous start.}
 \label{fig:nonsyn-rttloss}
-\vspace{-4mm}
 \end{figure}
 
-\begin{figure}[!t]
+In this set of experiments, %traffic generators are not started at the same time.
+the traffic generator in the Tokyo datacenter is started first, followed by the traffic generators in Hong Kong, in Houston and then in London. %The start time of the traffic generator in a subsequent datacenter is delayed for a configurable period of time after that of the previously started traffic generator.
+ In this way, the peak workload in different datacenters does not occur at the same time. Each traffic generator increases its user generation rate from 5 $users/s$ to 15 $users/s$ and then reduces it to $5~users/s$, with a 30s change interval.
+
+In Fig.~\ref{fig:nf-creation}(b), the start delay between traffic generators in Tokyo and in Hong Kong is set according to the values on the x axis, while start delays between traffic generators in Hong Kong and in Houston, and between traffic generators in Houston and in London, are set to 120s. We observe that the number of VNF instances created with the combined scaling approach is similar to proactive scaling approach, but always smaller than reactive scaling approach. Fig.~\ref{fig:nonsyn-rttloss} shows that the traffic quality is the best with the combined approach as well. The performance of CP SIP transaction completion time under asynchronous start is very similar to the results presented in Fig.~\ref{fig:syn-cp}. %Due to limited space, we show the DP traffic quality with 300s delay value in figure~\ref{fig:nonsyn-rttloss}. The combined approach out-performs reactive scaling by a large margin in terms of both flow loss rate and measured RTT.
+
+%We can see that the number of provisioned NF instances in combined scaling approach is apparently smaller than that of purely reactive scaling approach. And even with smaller NF instance provision number, the combined scaling approach has a better data plane traffic quality than the reactive scaling approach.
+
+\subsubsection{Explanation}
+
+\begin{figure}[!h]
         \centering
         \includegraphics[width=1\columnwidth]{chap-scalims/figure/nonsyn-reason.eps}
         \caption{%Delayed start time is 300s
 		%(a) Number of provisioned VNF instances in each datacenter versus time. (b) The number of service chain paths going through different datacenters.
 		 Number of VNF instances in/service chain paths through each datacenter: asynchronous start.}
         \label{fig:nonsyn-scpath}
-        \vspace{-5mm}
 \end{figure}
-
-
-
-\subsubsection{Asynchronous Start}
-
-
-In this set of experiments, %traffic generators are not started at the same time.
-the traffic generator in the Tokyo datacenter is started first, followed by the traffic generators in Hong Kong, in Houston and then in London. %The start time of the traffic generator in a subsequent datacenter is delayed for a configurable period of time after that of the previously started traffic generator.
- In this way, the peak workload in different datacenters does not occur at the same time. Each traffic generator increases its user generation rate from 5 $users/s$ to 15 $users/s$ and then reduces it to $5~users/s$, with a 30s change interval.
-
-In Fig.~\ref{fig:nf-creation}(b), the start delay between traffic generators in Tokyo and in Hong Kong is set according to the values on the x axis, while start delays between traffic generators in Hong Kong and in Houston, and between traffic generators in Houston and in London, are set to 120s. We observe that the number of VNF instances created with the combined scaling approach is similar to proactive scaling approach, but always smaller than reactive scaling approach. Fig.~\ref{fig:nonsyn-rttloss} shows that the traffic quality is the best with the combined approach as well. %Due to limited space, we show the DP traffic quality with 300s delay value in figure~\ref{fig:nonsyn-rttloss}. The combined approach out-performs reactive scaling by a large margin in terms of both flow loss rate and measured RTT.
-
-%We can see that the number of provisioned NF instances in combined scaling approach is apparently smaller than that of purely reactive scaling approach. And even with smaller NF instance provision number, the combined scaling approach has a better data plane traffic quality than the reactive scaling approach.
 
 Why can the combined scaling strategy perform well even when it creates a smaller number of VNF instances? The Tokyo datacenter sees the peak workload first, leading to the provisioning of many VNF instances in the datacenter, which later become redundant and will be buffered for 10 scaling intervals. When peak workload arrives at other datacenters, the global controller can re-use the buffered VNF instances by creating service chain paths traversing the Tokyo datacenter. %, increasing resource utilization efficiency. %We can see from the experiment results that as a side effect, traffic quality also gets improved. %The reason is illustrated in Fig.~\ref{fig:nonsyn-scpath}.
  These phenomena are exhibited in Fig.~\ref{fig:nonsyn-scpath}. %(a) shows the number of VNF instances created in each datacenter verses the time after the experiment starts. We can see that due to the early arrival of peak workload, many VNF instances are provisioned in Tokyo datacenter by 341s. After that time, the number of service chain paths that go through Tokyo datacenter increases from 7 to 11 (Fig.~\ref{fig:nonsyn-scpath}(b)) because the global controller schedules more DP traffic flows to re-use these existing VNF instances. Because these existing VNF instances are buffered and reused, DP traffic flows do not go through overloaded instances, improving the quality experienced by the DP flows.
-
-The performance of CP SIP transaction completion time under asynchronous start is very similar to the results presented in Fig.~\ref{fig:syn-cp}, and the figures are omitted due to space limit.
-
 
 
 

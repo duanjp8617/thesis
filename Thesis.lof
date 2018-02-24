@@ -1,31 +1,31 @@
 \select@language {english}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces IMS: an architectural overview\relax }}{11}{figure.caption.20}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Functional overview of \textit {ScalIMS}\relax }}{15}{figure.caption.23}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Proactive scaling protocol.\relax }}{18}{figure.caption.27}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Overall number of new VNF instances created: (a) simultaneous start; (b) asynchronous start.\relax }}{33}{figure.caption.92}
-\contentsline {figure}{\numberline {2.5}{\ignorespaces QoS of DP flows: simultaneous start.\relax }}{33}{figure.caption.93}
-\contentsline {figure}{\numberline {2.6}{\ignorespaces QoS of CP flows: simultaneous start.\relax }}{34}{figure.caption.94}
-\contentsline {figure}{\numberline {2.7}{\ignorespaces QoS of DP flows: asynchronous start.\relax }}{35}{figure.caption.95}
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Number of VNF instances in/service chain paths through each datacenter: asynchronous start.\relax }}{35}{figure.caption.96}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces IMS: an architectural overview\relax }}{13}{figure.caption.21}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Functional overview of \textit {ScalIMS}\relax }}{17}{figure.caption.24}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Proactive scaling protocol.\relax }}{20}{figure.caption.28}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Overall number of new VNF instances created: (a) simultaneous start; (b) asynchronous start.\relax }}{35}{figure.caption.92}
+\contentsline {figure}{\numberline {2.5}{\ignorespaces QoS of DP flows: simultaneous start.\relax }}{36}{figure.caption.94}
+\contentsline {figure}{\numberline {2.6}{\ignorespaces QoS of CP flows: simultaneous start.\relax }}{36}{figure.caption.95}
+\contentsline {figure}{\numberline {2.7}{\ignorespaces QoS of DP flows: asynchronous start.\relax }}{38}{figure.caption.97}
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Number of VNF instances in/service chain paths through each datacenter: asynchronous start.\relax }}{39}{figure.caption.99}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces An overview of the basic components of \textit {NFVactor}. Three clusters are shown in this figure: a cluster for provisioning service chain `NF1$\rightarrow $NF2$\rightarrow $NF3', a cluster for service chain `NF4$\rightarrow $NF5' and a cluster for service chain `NF6$\rightarrow $NF7'\relax }}{39}{figure.caption.102}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces The internal structure of a runtime.\relax }}{41}{figure.caption.106}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Flow replication and recovery: \textbf {RT} - replication target actor, \textbf {RS} - Replication source actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.)\relax }}{48}{figure.caption.119}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces The 3 flow migration steps: \textbf {MT} - migration target flow actor, \textbf {MS} - migration source flow actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.\relax }}{49}{figure.caption.123}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Comparison of runtime architecture.\relax }}{52}{figure.caption.125}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Performance of the Runtime.\relax }}{55}{figure.caption.128}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces System scalability.\relax }}{57}{figure.caption.132}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Performance of flow replication.\relax }}{59}{figure.caption.134}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Flow migration completion time.\relax }}{61}{figure.caption.138}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces An overview of the basic components of \textit {NFVactor}. Three clusters are shown in this figure: a cluster for provisioning service chain `NF1$\rightarrow $NF2$\rightarrow $NF3', a cluster for service chain `NF4$\rightarrow $NF5' and a cluster for service chain `NF6$\rightarrow $NF7'\relax }}{46}{figure.caption.105}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces The internal structure of a runtime.\relax }}{48}{figure.caption.109}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Flow replication and recovery: \textbf {RT} - replication target actor, \textbf {RS} - Replication source actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.)\relax }}{54}{figure.caption.122}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces The 3 flow migration steps: \textbf {MT} - migration target flow actor, \textbf {MS} - migration source flow actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.\relax }}{56}{figure.caption.126}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Comparison of runtime architecture.\relax }}{59}{figure.caption.128}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Performance of the Runtime.\relax }}{62}{figure.caption.131}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces System scalability.\relax }}{64}{figure.caption.135}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Performance of flow replication.\relax }}{66}{figure.caption.137}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Flow migration completion time.\relax }}{68}{figure.caption.141}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Malware detection in Bro.\relax }}{65}{figure.caption.144}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces An Overview of \textit {NetStar}.\relax }}{72}{figure.caption.179}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Workflow of async-flow objects (P represents a packet).\relax }}{75}{figure.caption.183}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Malware detector using \textit {NetStar}.\relax }}{78}{figure.caption.185}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Micro benchmarking on packet processing speed.\relax }}{84}{figure.caption.193}
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Micro benchmarking on asynchronous DB queries.\relax }}{85}{figure.caption.195}
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Performance comparison: NFs from the StatelessNF paper.\relax }}{86}{figure.caption.197}
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Performance comparison: different proxies.\relax }}{88}{figure.caption.200}
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Performance comparison: IDS.\relax }}{89}{figure.caption.202}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Malware detection in Bro.\relax }}{76}{figure.caption.148}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces An Overview of \textit {NetStar}.\relax }}{83}{figure.caption.183}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Workflow of async-flow objects (P represents a packet).\relax }}{85}{figure.caption.187}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Malware detector using \textit {NetStar}.\relax }}{89}{figure.caption.189}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Micro benchmarking on packet processing speed.\relax }}{94}{figure.caption.197}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Micro benchmarking on asynchronous DB queries.\relax }}{96}{figure.caption.199}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Performance comparison: NFs from the StatelessNF paper.\relax }}{97}{figure.caption.201}
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Performance comparison: different proxies.\relax }}{98}{figure.caption.204}
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Performance comparison: IDS.\relax }}{99}{figure.caption.206}

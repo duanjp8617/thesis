@@ -1,7 +1,3 @@
-\chapter {\nfactor: A Resilient NFV System using the Distributed Actor Model}
-\label{ch:nfvactor}
-\lhead{\chaptername \ \ref{ch:nfvactor}.\ \emph{\nfactor}}
-
 \section{Motivations for Using the Actor Model}
 
 Systems that enable failure resilience \cite{sherry2015rollback,rajagopalan2013pico} and flow migration \cite{rajagopalan2013split, gember2015opennf} typically achieve a low level of parallelism: a centralized controller governs the migration of all the flows among multiple NF instances, while an entire NF process has to be checkpointed for replication. If we can improve the parallelism by providing an efficient per-flow execution environment, then each flow can migrate and replicate itself without full-process checkpointing and centralized migration control, leading to improved resilience performance. Such a per-flow execution environment can be modelled by actors.

@@ -15,7 +15,6 @@ as shown in Fig.~\ref{fig:proactive-scaling} is followed, with the following dif
 
 %DP workload is described by the number of the packet sent over each entry-exit datacenter pair every second. Local controller acquires input DP workload by reading workload measuring OpenFlow rules installed on the entry switch (see Sec.\ref{sec:flow-routing-on-dp}). DP workload is reported to the global controller every second. DP proactive scaling algorithm also needs inter-datacenter delay prediction to update service chain paths. It is measured by each local controller through a ping test to every other local controllers and the result is reported to global controller every second.
 
-\vspace{-3mm}
 \subsection{DP Service Chain Path}
 \label{sec:dp-service-chain-path}
 
@@ -38,7 +37,6 @@ The definition of service chain path augments an actual service chain with a vir
 
 Each service chain path should satisfy two conditions. (i) Looplessness: if datacenter $i$ hosts both stages $x$ and $y$, $x<y$ on the service chain, then datacenter $i$ must host stage $z$, where $x<z<y$ too; otherwise, a routing loop is created on the inter-datacenter network, which increases end-to-end delay and wastes important inter-datacenetr network bandwidth. There is no need for \textit{ScalIMS} to tackle routing loops inside a datacenter, as routing loops inside datacentres are not common and can be resolved by method described in \cite{stephens2012past}. (ii) Bounded end-to-end delay between the entry datacenter and the exit datacenter along the service chain path, by a pre-defined threshold. %, otherwise DP media flows using this service chain path may experience unexpected high round-trip-time.
 
-\vspace{-3mm}
 \subsection{DP Proactive Scaling Algorithm}
 \label{sec:dp-proactive-scaling-alg}
 
@@ -83,8 +81,6 @@ Finally, scale-in is carried out to enqueue un-used VNF instances into the buffe
 
 
 %In the stage placement algorithm discussed in Sec.~\ref{sec:stage-placement-algorithm}, the virtual entry stage and virtual exit stage both have infinite capacities.
-
-\vspace{-3mm}
 \subsection{Service Chain Path Computation}
 \label{sec:pathcomp}
 
@@ -137,7 +133,6 @@ In Alg.~\ref{algo:pc}, the $record$ list retains the service chain path under in
 	Suppose that Alg.~\ref{algo:pc} is finding a service chain path for entry-exit datacenter pair $(1, 5)$ and the DP service chain consists of $3$ stages. During the execution of the algorithm, the {\em record} list contains $(1, 2, 4, tbd, 5)$. It means the algorithm has determined that instances of stage $1$ VNF should be placed on datacenter $2$ and instances of stage $2$ VNF should be placed on datacenter $4$. And the algorithm is going to find out a datacenter for hosting instances of stage $3$ VNF. If datacenter $2$ is selected to host the stage-$3$ VNF, then the {\em record} becomes $(1, 2, 4, 2, 5)$ and a loop is created between datacenters $2$ and $4$.
 \end{comment}
 
-\vspace{1mm}
 \noindent \textbf{Loop Elimination.}
 %\label{sec:loop-elimination}
 To eliminate a loop in the path introduced in lines 5-6 of Alg.~\ref{algo:pc}, we adjust the {\em record} list following two ways: (i) place all VNF stages involved in the loop on the datacenter at the start of the loop. Suppose the path with loop is $(1, 2, 4, 2, 5)$. It is adjusted to $(1, 2, 2, 2, 5)$, i.e., the datacenter hosting stage $2$ is changed from datacenter $4$ to datacenter $2$. %  Considering the previous example, it means that the record is adjusted to $(1, 2, 2, 2, 5)$ by changing the datacenter hosting stage $2$ from datacenter $4$ to datacenter $2$.
@@ -196,7 +191,6 @@ N(0, j) =  N(0, j-1)+num(0,j), j=1, \ldots, m+1%j \geq 1
 \label{algo:sp}
 \end{algorithm}
 
-\vspace{1mm}
 \noindent\textbf{Stage Placement Algorithm.} Alg.~\ref{algo:sp} gives the stage placement algorithm used in line 20 of Alg.~\ref{algo:pc}, which calculates a service chain path, i.e., the sequence of datacenters to host VNF stages on the service chain, that minimizes the number of new VNF instances to be created on the path. %The resulting service chain path must traverse all the datacenters on the datacenter path in sequence without creating a routing loop.
 
 In Alg.~\ref{algo:sp}, $num(i, j)$ is the number of new stage-$j$ VNF instances to be created, if stage $j$ is to be deployed on datacenter $d[i]$. $num(i, j)$ is computed in Eqn.~\ref{eq6} based on the following observation: if datacenter $d[i]$ is chosen to host stage $j$, then the remaining number of yet-to-be-placed stages, $(m+2)-(j+1)$, must be no smaller than the remaining number of datacenters which do not host any stage yet, $k-(i+1)$, as otherwise the resulting service chain is not able to traverse the shortest-delay datacenter path in sequence. %The third condition in Eqn.~(\ref{eq6}) reflects this observation, where as the first two conditions in Eqn.~(\ref{eq6}) are calculated as usual.
@@ -263,7 +257,6 @@ $num(i,j)=
 
 %We note that we do not take available inter-datacenter bandwidth into consideration in our scaling algorithms, given that inter-datacenter bandwidth should be sufficient for our NFV system since the datacenters are hosting many more services than ours.
 
-\vspace{-3mm}
 \subsection{Flow Routing On Data Plane}
 \label{sec:flow-routing-on-dp}
 
@@ -277,7 +270,6 @@ Each DP media flow enters the system from the entry datacenter, is routed throug
 The caller learns an IP address located in his entry datacenter %\chuan{is this IP address of P-CSCF instance? If so, just say `learns IP address of a P-CSCF instance in his ...'}
 when the SIP OK message is received (Sec.~\ref{sec:message-routing-on-control-plane}). This IP address is used as the destination IP address to send the DP media flow to the entry datacenter. %, from where the flow enters the DP service chain.
 
-\vspace{1mm}
 \noindent\textbf{Route through Service Chain Path.}
 %\label{sec:follow-sc}
 The local controller in a datacenter decides the service chain path used by a media flow, when the first packet of the flow arrives at the datacenter and triggers an OpenFlow Packet\_IN message at the local controller. The local controller examines whether the packet header contains a special tag. In our implementation of \textit{ScalIMS}, the tag is added to the destination port field by a special OpenFlow rule in the flow's entry datacenter. The tag contains the indices of the flow's entry and exit datacenters, and the current scaling interval number modulo 4. % (to be explained in Sec.~\ref{Inconsistency}).
@@ -321,7 +313,6 @@ The local controller selects the service chain path indicated in the tag. Then i
 
 %In \textit{ScalIMS}, if the flow has passed through stage $i$ $(i=1, ..., 3)$ VNF and is going to another datacenter for further processing, we fill the matched bits with a mask of $255<<8*[4-(i+1)]$ by the index of the next datacenter. Note that the mask $255<<8*[4-(i+1)]$ is the mask for stage $i+1$ ( If $i=3$, we treat stage $4$ as an virtual exit stage that is always deployed on exit datacenter, with details in first difference at start of Sec.~\ref{sec-dp-scaling}). When the flow comes out of the exit NIC of the last processing stage in the current datacenter, a pre-installed static rule automatically routes the flow to the next datacenter through a VxLAN tunnel~\cite{vxlan}, if the matched bits indicate the index of the next datacenter.
 
-\vspace{1mm}
 \noindent\textbf{Exit from Service Chain Path.}
 %\label{sec:exit-sc}
 At the exit datacenter, the local controller uses mapping 4 in Table~\ref{mappings} to retrieve the IP address on callee's entry datacenter, callee IP and callee's receive port. If the exit datacenter also hosts VNF stage(s) in the service chain, the flow is routed through the VNF instance(s). %After the flow traverses the selected VNF instances on the exit datacenter,
@@ -329,7 +320,6 @@ Then the local controller uses an OpenFlow rule to perform an address translatio
 
 %When the flow has been processed by VNFs of all stages, it exits from the DP service chain path. To send the flow to the callee, the local controller in the exit datacenter maps the caller's source IP and source port to the callee's entry IP, callee IP, callee receive port according to the fourth mapping in Table~\ref{mappings}.  Then an address translation is carried out to substitute the caller's source IP by the callee's IP, the caller's destination IP by the callee's IP, and the caller's destination port by the callee's receive port.
 
-\vspace{-3mm}
 \subsection{Handling Scaling Interval Inconsistency}\label{Inconsistency}
 
 %DP flow routing consists of 3 conditions, which are routing at entry datacenter, routing at intermediate datacenter and routing at exit datacenter. We use DP traffic flow sent by caller to illustrate the DP flow routing. The same process could be mirrored on DP traffic flow sent by callee.

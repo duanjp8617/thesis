@@ -1,6 +1,6 @@
 \section{Scaling of Control Plane Service Chain}
 \label{System-Design}
-%We first present the detailed design of \textit{ScalIMS} in deployment and scaling of the control plane (CP) service chain. %We start by discussing the scaling strategy used by CP service chain. The proactive scaling is governed by a proactive scaling protocol, whereas the reactive scaling is controlled by overload detection through runtime statistics. The proactive and reactive scaling of CP service chain are generic enough such that the DP service chain uses a similar scaling strategy with CP service chain with only minor difference. This section then presents how SIP messages are transmitted and manipulated on the CP service chain, so that data plane media flows could be routed over correct paths.
+We first present the detailed design of \textit{ScalIMS} in deployment and scaling of the control plane (CP) service chain. %We start by discussing the scaling strategy used by CP service chain. The proactive scaling is governed by a proactive scaling protocol, whereas the reactive scaling is controlled by overload detection through runtime statistics. The proactive and reactive scaling of CP service chain are generic enough such that the DP service chain uses a similar scaling strategy with CP service chain with only minor difference. This section then presents how SIP messages are transmitted and manipulated on the CP service chain, so that data plane media flows could be routed over correct paths.
 
 \subsection{Deployment and Entry Datacenter Binding}
 
@@ -39,7 +39,6 @@ When a call is initiated between user $a$ and user $b$, user $b$'s entry datacen
 %new
 Proactive scaling is executed in each scaling interval according to the protocol illustrated in Fig.~\ref{fig:proactive-scaling}.
 
-\vspace{1mm}
 \noindent\textbf{1. Workload Prediction.}
 Workload along a CP service chain is described by the number of SIP transactions carried out between each entry-exit datacenter pair every second. When a SIP transaction finishes, the S-CSCF instance involved uses the location service to determine which entry-exit pair this transaction belongs to (according to the IP addresses of the caller and the callee). Each S-CSCF instance keeps a record of the number of SIP transactions on each entry-exit datacenter pair and reports this number to the local controller in its datacenter every second. The local controller accumulates CP workload for 5 seconds before relaying it to global controller.
 
@@ -50,21 +49,16 @@ At the end of a scaling interval $t$, the global controller predicts the workloa
 %\noindent
 Here $\mu$ is the mean of the historic workload values in the past several scaling intervals, $u_t$ is the average CP workload collected in the current interval, and $\phi$ can be decided using the covariance of the historical workload divided by the variance of the historical workload. The workload between each entry-exit datacenter pair is predicted this way.
 
-\vspace{1mm}
 \noindent\textbf{2. Acquire Current VNF Provision.} The global controller then broadcasts a message to local controllers, asking them to send %information of the current VNF instance provisioning,
  the numbers of instances of each VNF provisioned in the respective datacenter. Upon receiving this request, a local controller knows that proactive scaling computation is on going, stops its reactive scaling process (Sec.~\ref{sec:CP_reactivescale}) so that it does not interfere with proactive scaling, and then sends its current VNF provision information to the global controller.
 
-\vspace{1mm}
 \noindent\textbf{3. Run Proactive Scaling Alrogihm.} After receiving current VNF deployment from all local controllers, the global controller computes the numbers of P-CSCF and S-CSCF instances to be deployed in each datacenter in the next scaling interval. Since all S-CSCF instances are placed in the same datacenter, the number is decided by dividing the total predicted workload between all pairs of entry-exit datacenters by the processing capacity of S-CSCF. The number of P-CSCF instances to be deployed in a datacenter is computed by dividing the overall predicted workload for the entry-exit datacenter pairs, which use this datacenter as either entry or exit datacenter, by the processing capacity of P-CSCF.
 
-\vspace{1mm}
 \noindent\textbf{4. Broadcast Proactive Scaling Result.} The global controller then broadcasts the computed numbers to local controllers. A local controller sends a completion message to the global controller, after creating new VNF instances (scale-out) or enqueueing unused VNF instances to the respective buffer queues (scale-in), according to the received numbers.
 
-\vspace{1mm}
 \noindent\textbf{5. Enter New Scaling Interval.} After the global controller receives completion messages from all local controllers, it broadcasts an ``enter new scaling interval'' message to all local controllers. After receiving this message, a local controller increments its scaling interval index by 1, and shuts down some VNF instances from the head of the buffer queues. Then the local controller sends a final acknowledgement to the global controller. Upon receiving all final acknowledgements, % from all local controllers,
  the global controller increases its scaling interval index by 1.
 
-\vspace{1mm}
 \textit{Buffer Queue.} In each datacenter, a double-ended buffer queue is maintained to temporarily hold unused VNF instances, with one queue for one type of VNF. When a VNF instance is to be removed, instead of directly shutting it down, the local controller tags it with the index of the current scaling interval, and enqueues it to the tail of the respective buffer queue. Once a VNF instance is enqueued, no more flows will be routed to it. Whenever more instances of a VNF are to be established, if there are available instances in the buffer queue of this VNF, buffered instances will be popped out from the tail of the queue, and transformed back to working instances, to fulfil the demand as much as possible. The purpose is to avoid creating new VNF instances frequently and improve flow loss rate, as the typical VNF creation time can last a few seconds and has a bad influence on flow loss rate. Unused buffered VNF instances are destroyed after $\tau$ scaling intervals ($\tau$ is set to 10 in our implementation), in Step 5 above.
 %: when the local controller in the datacenter receives an ``enter new scaling interval message'', it checks from the head of each buffer queue whether an instance has been enqueued $\tau$ intervals ago; if so, the VNF instance at the head will be dequeued. Dequeuing repeats until all unused instances for $\tau$ intervals are cleaned. These dequeued VNF instances gets destroyed by local controller when there's no active traffic on them.
 % The local controller will destroy dequeued VNF instances until there's no active traffic on them.
@@ -78,7 +72,6 @@ Here $\mu$ is the mean of the historic workload values in the past several scali
 An agent running on each VNF instance reports to the local controller runtime statistics of the instance, e.g., CPU usage, memory usage and the number of input packets, in each second. The local controller maintains time series of these statistics for each VNF instance. It decides whether CPU, memory, or network is overloaded during the past several seconds by comparing the respective statistics with a threshold (Sec.~\ref{Evaluation}). If overload is persistently identified for at least two types of statistics ({\em e.g.}, CPU and network usage) for some consecutive time (5 seconds as in our experiments), then that VNF instance is reported as overloaded. We make the decision using two types of statistics in order to eliminate false alarms brought by examining a single statistics. The local controller then avoids routing new traffic flows ({\em i.e.}, new calls) to overloaded instances if there are other available instances. In a datacenter, if the states of a majority of instances of a VNF are ``overloaded'', scale-out is triggered by adding one new instance of that VNF. Note that no scale-in decisions (i.e., removing instances) are made reactively. They are solely handled by the proactive scaling protocol, as it improves system stability during workload fluctuation.
 %Because efficient reactive-scale-in requires support of dynamic flow migration \cite{gember2014opennf} to quickly shutdown idle VNF instances, which is hard to implement.
 
-\vspace{-3mm}
 \subsection{Flow Routing on Control Plane}
 \label{sec:message-routing-on-control-plane}
 

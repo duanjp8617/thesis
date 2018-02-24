@@ -1,7 +1,3 @@
-\chapter {\textit{ScalIMS}: Scaling IMS Service Chains Across Geo-distributed Datacenters}
-\label{ch:scalims}
-\lhead{\chaptername \ \ref{ch:scalims}.\ \emph{\textit{ScalIMS}}}
-
 \section{Background} \label{Background}
 \subsection{IMS Overview}
 
@@ -56,7 +52,6 @@ To make a call, a user first registers his IP address to the IMS by initiating a
 
 %A good NFV management system should effectively scales both the control and data plane service chains of the IMS system. %Since the operation of these two service chains are coupled together through SIP protocol, \textit{ScalIMS} uses a novel method based on flow tagging to effectively scale these two service chains.
 
-\vspace{-3mm}
 \subsection{Related Work}
 
 %In recent years, researchers have pay great attention to NFV technology. By running VNF softwares in virtual machines on computing clusters~\cite{palkar2015e2} or on cloud~\cite{sherry2012making}~\cite{lan2016embark}, service providers could be freed from managing complicated hardware network functions and deploy service chains at ease.
@@ -64,7 +59,7 @@ To make a call, a user first registers his IP address to the IMS by initiating a
 %Performance and scalability of using VNFs in the place of hardware middleboxes have been the focuses of investigation in the existing literature on NFV.
 
 %\noindent \textbf{Performance.}
-Running VNF software (e.g., DP packet processing software) on VMs incurs significant context switching cost~\cite{rizzo2013speeding}, limiting the maximum throughput of a VNF. To solve this problem, ClickOS~\cite{martins2014clickos} maps packets directly from NIC receive queues to a shared memory region, and fetch packets directly from that shared memory region~\cite{dpdk}, which greatly improve packet processing throughput. However, this approach completely by-passes the existing kernel networking stack, unable to support VNFs (e.g., S-CSCF and P-CSCF) that use the traditional TCP/IP stack. %
+Running VNF software (e.g., DP packet processing software) on VMs incurs significant context switching cost~\cite{rizzo2013speeding}, limiting the maximum throughput of a VNF. To solve this problem, ClickOS~\cite{martins2014clickos} maps packets directly from NIC receive queues to a shared memory region, and fetch packets directly from that shared memory region~\cite{dpdk}, which greatly improve packet processing throughput. However, this approach completely by-passes the existing kernel networking stack, unable to support VNFs (e.g., S-CSCF and P-CSCF used by IMS system) that use the traditional TCP/IP stack. %
 %lose flexibility for network programability (i.e. SDN~\cite{mckeown2008openflow} functionality provided by OpenvSwitch~\cite{pfaff2015design}). On the other hand, some control-plane VNFs (e.g., P-CSCF and S-CSCF as in the Clearwater Project~\cite{project-clearwater}) function well enough on existing network stacks as they are application-level software. If enough scalability is given, existing network stacks could still be used to build NFV service chains.
 
 %\noindent \textbf{Scalability.}
