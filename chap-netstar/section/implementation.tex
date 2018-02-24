@@ -27,26 +27,20 @@ We improve Seastar to allow the creation of multiple TCP/IP stacks.
 
 We have built multiple representative NFs using \netstar.
 
-
-
-\vspace{1mm}
 \noindent\textbf{NFs from the StatelessNF paper \cite{201545}.} We reimplement four NFs from the StatelessNF paper, \ie, firewall, NAT, IDS and load balancer. Our implementation follows the pseudo-code logic in the paper, and leverages our async-flow interface. The major differences are: (1) we do not need to set up a dedicated polling thread for each worker thread to poll each NIC queue; each thread in \netstar~performs all the tasks including port polling and packet processing. %, while ensuring full asynchrony with low overhead.
 (2) %Since \netstar~is fast has good scalability,
 We use a fast in-memory key-value store, mica \cite{179747}, which has a larger throughput than the RAMCloud database \cite{ousterhout2015ramcloud} used in StatelessNF. %We also implement a custom client library for our NFs to read from and write to mica database. %\chuan{clarify whether this client interface is the same or different from the async-flow interface}.
 (3) In StatelessNF, a unique thread is dedicated to contact RAMCloud for storing the per-flow states; with \netstar, the async-flow objects running in each thread can use the thread-local mica client library to contact mica server concurrently.
 %\netstar~is equipped with a client interface that is created on each client thread \chuan{clarify what each client thread is and what the client interface is}. Since mica is partitioned and different client threads can concurrently read and write to mica,
 
-\vspace{1mm}
 \noindent\textbf{An HTTP reverse proxy.} We use the TCP/IP stack in \netstar~to implement an HTTP reverse proxy, whose functionality is similar to HAProxy (see Sec.~\ref{sec:bro}) and TinyProxy \cite{}: %, acting as a middleman between HTTP clients and servers:
 it intercepts incoming TCP connections from clients, and relays HTTP requests to servers; it then receives HTTP responses from the servers and pushes them back to the clients. %Our proxy implementation leverages the enhancement for creating multiple TCP/IP stacks that we made to Seastar.
 
-\vspace{1mm}
 \noindent\textbf{An IDS that inspects HTTP payload.} This IDS detects potential intrusion from the reconstructed HTTP request payload using our async-flow interface, which is more complicated than the IDS implemented following the StatelessNF. %This IDS is equipped with a preprocessor for reconstructing the TCP byte stream. The core processing logic of the IDS parses converts the reconstructed TCP byte stream into a special input stream, which is fed to the built-in HTTP request parser of Seastar for checking whether the received byte stream contains a valid HTTP request. Once an HTTP request is received, the IDS passes the entire HTTP request payload to the AC automaton \cite{} to detect intrusion. The IDS drops subsequent flow packets if an intrusion is detected, otherwise forwards the packet.
 
 % To compare the performance of this IDS, we re-implement a similar IDS with mOS library \cite{}. We choose mOS because it is the state-of-art library implemented with callback-based event-driven style. We can use an implementation in mOS to evaluate whether NetStar approaches state-of-art performance.
 
 %When the HTTP reregisters reconstructed TCP byte stream  parses the TCP connection states and uses a reordering buffer to reconstruct the TCP bytestream. It parses the bytestream to extract HTTP requests and checks the HTTP request against a malware detection engine.
 
-\vspace{1mm}
 \noindent\textbf{A Malware Detector} as introduced in Sec.~\ref{IDSexample}. %The malware detector is equipped with a preprocessor for generating file hash event on transmitted files over reconstructed TCP byte stream. The core processing logic of the malware detector is implemented according to Fig.~\ref{}.
  It utilizes the async-flow interface and the TCP/IP stack in \netstar~concurrently. %In particular, we uses the TCP/IP stack to implement a database query interface. For DNS query interface, we re-use existing DNS module in Seastar. We also set up a database server and a DNS server in our cluster for the malware detector to query.

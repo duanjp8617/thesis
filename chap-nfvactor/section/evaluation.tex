@@ -131,8 +131,7 @@ Fig.~\ref{fig:rep_latency_pdf} shows the CDF of packet processing latencies of \
 
 Table \ref{table:recover} shows the average recovery time of 6 replication target runtimes when their corresponding replication source runtimes fail simultaneously. We can see that \nfactor~has a much shorter recovery time than the libcaf version even when processing a larger number of flows.
 
-\vspace{-3mm}
-\subsubsection{Comparison with FTMB} We compare the performance of flow replication in \nfactor~with the reported performance of FTMB \cite{sherry2015rollback}. Both systems achieve throughput up to millions of packets per second and recovery time of tens of milliseconds with flow replication enabled. \nfactor~has a more stable packet processing latency (according to Fig.~\ref{fig:rep_latency_pdf}, smaller than 70 microseconds, with an average of 20 microseconds) because it does not need to checkpoint the runtime, whereas FTMB introduces a relatively high packet processing latency (up to 3000 microseconds) when checkpointing kicks in.
+\textbf{Comparison with FTMB.} We compare the performance of flow replication in \nfactor~with the reported performance of FTMB \cite{sherry2015rollback}. Both systems achieve throughput up to millions of packets per second and recovery time of tens of milliseconds with flow replication enabled. \nfactor~has a more stable packet processing latency (according to Fig.~\ref{fig:rep_latency_pdf}, smaller than 70 microseconds, with an average of 20 microseconds) because it does not need to checkpoint the runtime, whereas FTMB introduces a relatively high packet processing latency (up to 3000 microseconds) when checkpointing kicks in.
 
 \subsection{Performance of Flow Migration}
 \label{sec:fmp}

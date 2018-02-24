@@ -24,16 +24,14 @@ to direct dataplane flows to virtual switches, which further dispatch them to ru
 %\footnote{When our flow replication mechanism is in place, a flow will be sent by replica runtime to the virtual switch, to be forwarded outside (Sec.~\ref{sec:resilience}).}
 The coordinator also manages dynamic scaling and failure recovery of~\nfactor~by interacting with runtimes and virtual switches through a series of control RPCs (Sec.~\ref{sec:coordinator}).
 
-Dataplane flows can be migrated and replicated from one runtime to another runtime within the same cluster in a distributed fashion without persistent involvement of the coordinator. The details of flow migration and replication are further introduced in Sec.~\ref{sec:management}.
-
-%To replicate a flow (Sec.~\ref{sec:replicating-runtime}), the corresponding flow actor first launches a replica actor running on another runtime. Then the flow actor constantly saves its private state to the replica actor. The coordinator monitors the flow actor by regularly checking the liveness of the flow actor's runtime. In case of the runtime failure, the replica actor substitutes the flow actor and resumes normal flow processing. To migrate a flow (Sec.~\ref{sec:migration}), the flow actor initializes a target flow actor on another runtime. Then the flow actor contacts the virtual switch to redirect the flow to the target actor, followed by transmitting its private state to the target target. When the migration finishes, the original flow actor destroys itself and the target flow actor continues to process the flow.
+Dataplane flows can be migrated and replicated from one runtime to another runtime within the same cluster in a distributed fashion without persistent involvement of the coordinator. To replicate a flow (Sec.~\ref{sec:replicating-runtime}), the corresponding flow actor first launches a replica actor running on another runtime. Then the flow actor constantly saves its private state to the replica actor. The coordinator monitors the flow actor by regularly checking the liveness of the flow actor's runtime. In case of the runtime failure, the replica actor substitutes the flow actor and resumes normal flow processing. To migrate a flow (Sec.~\ref{sec:migration}), the flow actor initializes a target flow actor on another runtime. Then the flow actor contacts the virtual switch to redirect the flow to the target actor, followed by transmitting its private state to the target target. When the migration finishes, the original flow actor destroys itself and the target flow actor continues to process the flow.
 
 \subsection{Runtime}
 \label{sec:runtime}
 
 \nfactor~employs a carefully designed, uniform runtime system to run flow actors. Within a runtime, we adopt a {\em one-actor-one-flow} design principle: a dedicated flow actor is created to handle each flow received by the runtime. Packet processing by NFs and resilience operations are all implemented as reactive message handlers of the flow actor. The runtime timely schedules each flow actor to react to the various events, so that each flow actor can process flow packets and manage its own resilience in a largely decentralized fashion. Our one-actor-one-flow principle improves the parallelism of resilience operations and serves as the basis for high-performance resilience support.
 
-%To further demonstrate how a runtime works, we first shows the internal structure of a runtime, followed by its overall work flow to process data-plane flows and remote actor messages. Finally, we discuss the service chain model adopted by each runtime.
+%To further demonstrate how a runtime works, we first show the internal structure of a runtime, followed by its overall work flow to process data-plane flows and remote actor messages. Finally, we discuss the service chain model adopted by each runtime.
 
 \subsubsection{Internal Structure}
 
@@ -77,11 +75,11 @@ During flow migration and replication, each virtual switch actor can independent
 \subsection{Coordinator}
 \label{sec:coordinator}
 
-\begin{table}[!t]
+\begin{table}[!h]
 \centering
 \caption{Control RPCs Exposed at Each Runtime}
 \label{table:rpc}
-\resizebox{0.8\columnwidth}{!}{
+\resizebox{\columnwidth}{!}{
 \begin{tabular}{l|l}
 \textbf{Control RPC}                                                                                   & \textbf{Functionality}                                                                                                                                              \\ \hline
 poll\_workload()                                                                                   & \begin{tabular}[c]{@{}l@{}}Poll the load information \\ from a runtime.\end{tabular}                                                                 \\ \hline
@@ -94,8 +92,7 @@ recover(runtime\_id)                                                            
 \end{table}
 
 
-The coordinator in \nfactor~is responsible for basic cluster management routines. %, e.g., monitoring system workload, updating cluster composition,  dynamically scaling runtimes for deployed clusters, and recovering failed runtime in a cluster.
-As compared to centralized controllers in the existing NFV systems \cite{gember2015opennf, rajagopalan2013split}, the coordinator only uses light-weight RPC calls to initiate the flow migration and replication process.
+The coordinator in \nfactor~is responsible for basic cluster management routines, \eg, monitoring system workload, updating cluster composition,  dynamically scaling runtimes for deployed clusters, and recovering failed runtime in a cluster. As compared to centralized controllers in the existing NFV systems \cite{gember2015opennf, rajagopalan2013split}, the coordinator only uses light-weight RPC calls to initiate the flow migration and replication process.
 
 The coordinator communicates with runtimes via a number of control RPCs summarized in Tbl.~\ref{table:rpc}. It uses $poll\_workload()$ to acquire the current workload on a runtime. It updates cluster composition (including MAC addresses of input/output/control ports, workload status and IDs of all runtimes and virtual switches in the cluster) to all the runtimes and virtual switches in a cluster using $notify\_cluster\_cfg(cfg)$.
 
@@ -106,10 +103,10 @@ The last three RPCs shown in Tbl.~\ref{table:rpc} are used to initiate flow migr
 %\subsection{Dynamic Scaling}
 %\label{sec:scaling}
 
-\textbf{Dynamic Scaling.} The coordinator performs dynamic scaling of the runtimes and virtual switches by exploiting the distributed flow migration mechanism.
-%It fully exploits distributed flow migration mechanism to resolve hot spot and shut down mostly idle runtimes.
-The coordinator periodically polls the workload statistics from all the runtimes.
-%, containing the number of dropped packets on the input port, the current packet processing throughput and the number of active flows. In the current~\nfactor~prototype, the runtime is identified as overloaded if the number of dropped packets exceeds a fixed threshold (100 as in our experiments). This is an effective overload indicator for~\nfactor: an overloaded runtime can not timely poll all the packets from its input port, therefore increasing the number of dropped packets significantly, while the CPU usage is rendered ineffective as the worker thread is a busy-polling thread and uses 100\% of the CPU all the time.
+\textbf{Dynamic Scaling.} The coordinator performs dynamic scaling of the runtimes and virtual switches by exploiting the distributed flow migration mechanism. It fully exploits distributed flow migration mechanism to resolve hot spot and shut down mostly idle runtimes.
+
+The coordinator periodically polls the workload statistics from all the runtimes, containing the number of dropped packets on the input port, the current packet processing throughput and the number of active flows. In the current~\nfactor~prototype, the runtime is identified as overloaded if the number of dropped packets exceeds a fixed threshold (100 as in our experiments). This is an effective overload indicator for~\nfactor: an overloaded runtime can not timely poll all the packets from its input port, therefore increasing the number of dropped packets significantly, while the CPU usage is rendered ineffective as the worker thread is a busy-polling thread and uses 100\% of the CPU all the time.
+
 If there is an overloaded runtime in a cluster, the coordinator launches a new runtime in the same cluster and keeps migrating a configurable number of flows from overloaded runtime (500 as in our experiments) to the new runtime, until half of the workload on the overloaded runtime is migrated away. %all the hotspots are resolved. % If the new runtime becomes overloaded, more runtimes are added.
 %We add new runtimes instead of moving flows across existing runtimes, since the load on existing runtimes is largely balanced, due to the load-balancing functionality of virtual switches.
 If runtimes in a cluster become largely idle, the coordinator carries out scale-in: it selects a runtime with the smallest throughput, migrates all its flows to the other runtimes, and shuts the runtime down when all the flows have been successfully moved out.
