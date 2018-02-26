@@ -1,8 +1,8 @@
 \section{Scaling of Control Plane Service Chain}
-\label{System-Design}
+\label{sec:scalims-cp}
 We first present the detailed design of \textit{ScalIMS} in deployment and scaling of the control plane (CP) service chain. %We start by discussing the scaling strategy used by CP service chain. The proactive scaling is governed by a proactive scaling protocol, whereas the reactive scaling is controlled by overload detection through runtime statistics. The proactive and reactive scaling of CP service chain are generic enough such that the DP service chain uses a similar scaling strategy with CP service chain with only minor difference. This section then presents how SIP messages are transmitted and manipulated on the CP service chain, so that data plane media flows could be routed over correct paths.
 
-\subsection{Deployment and Entry Datacenter Binding}
+\subsection{Deployment and Entry Datacenter Binding} \label{System-Design}
 
 %\subsubsection{Fixed CP Service Chain Placement}
 The CP service chain consists of P-CSCF and S-CSCF. We use a fixed placement strategy by deploying P-CSCF instances on every datacenter and S-CSCF instances on a fixed selected datacenter, such that the delay between the datacenter where we place S-CSCF instances and other datacenters falls within an acceptable range (the acceptable SIP transaction completion time is typically 250ms).
@@ -69,7 +69,7 @@ Here $\mu$ is the mean of the historic workload values in the past several scali
 
 %Duan's new:
 %address some problems
-An agent running on each VNF instance reports to the local controller runtime statistics of the instance, e.g., CPU usage, memory usage and the number of input packets, in each second. The local controller maintains time series of these statistics for each VNF instance. It decides whether CPU, memory, or network is overloaded during the past several seconds by comparing the respective statistics with a threshold (Sec.~\ref{Evaluation}). If overload is persistently identified for at least two types of statistics ({\em e.g.}, CPU and network usage) for some consecutive time (5 seconds as in our experiments), then that VNF instance is reported as overloaded. We make the decision using two types of statistics in order to eliminate false alarms brought by examining a single statistics. The local controller then avoids routing new traffic flows ({\em i.e.}, new calls) to overloaded instances if there are other available instances. In a datacenter, if the states of a majority of instances of a VNF are ``overloaded'', scale-out is triggered by adding one new instance of that VNF. Note that no scale-in decisions (i.e., removing instances) are made reactively. They are solely handled by the proactive scaling protocol, as it improves system stability during workload fluctuation.
+An agent running on each VNF instance reports to the local controller runtime statistics of the instance, e.g., CPU usage, memory usage and the number of input packets, in each second. The local controller maintains time series of these statistics for each VNF instance. It decides whether CPU, memory, or network is overloaded during the past several seconds by comparing the respective statistics with a threshold (Sec.~\ref{sec:scalims-evaluation}). If overload is persistently identified for at least two types of statistics ({\em e.g.}, CPU and network usage) for some consecutive time (5 seconds as in our experiments), then that VNF instance is reported as overloaded. We make the decision using two types of statistics in order to eliminate false alarms brought by examining a single statistics. The local controller then avoids routing new traffic flows ({\em i.e.}, new calls) to overloaded instances if there are other available instances. In a datacenter, if the states of a majority of instances of a VNF are ``overloaded'', scale-out is triggered by adding one new instance of that VNF. Note that no scale-in decisions (i.e., removing instances) are made reactively. They are solely handled by the proactive scaling protocol, as it improves system stability during workload fluctuation.
 %Because efficient reactive-scale-in requires support of dynamic flow migration \cite{gember2014opennf} to quickly shutdown idle VNF instances, which is hard to implement.
 
 \subsection{Flow Routing on Control Plane}
@@ -102,7 +102,7 @@ caller and the callee use the learned IP addresses as the destination IP address
 %The content of these two messages are modified by the P-CSCF instance in order for the caller/callee to learn a destination IP address on his entry datacenter.  When a SIP INVITE message passes through callee's entry datacenter, the source IP field is modified to an IP address located on the callee's entry datacenter, so that the callee learns about a destination IP address located on callee's entry datacenter. A similar process is applied to SIP OK message when the message passes through caller's entry datacenter as well.
 
 
-Besides SIP message modification, a P-CSCF instance sends two mappings (Table~\ref{mappings}) to its local controller after it has received the SIP OK message. The local controller saves these mappings for use when processing the DP flows (Sec.~\ref{sec-dp-scaling}). %The saved mapping differs depending on whether the P-CSCF instance is on caller's or callee's entry datacenter.
+Besides SIP message modification, a P-CSCF instance sends two mappings (Table~\ref{mappings}) to its local controller after it has received the SIP OK message. The local controller saves these mappings for use when processing the DP flows (Sec.~\ref{sec:scalims-dp}). %The saved mapping differs depending on whether the P-CSCF instance is on caller's or callee's entry datacenter.
 
 
 

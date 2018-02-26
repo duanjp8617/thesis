@@ -2,7 +2,9 @@
 \label{ch:scalims}
 \lhead{\chaptername \ \ref{ch:scalims}.\ \emph{\textit{ScalIMS}}}
 
-\section{Introduction} \label{Introduction}
+This chapter discusses the design and implementation of \textit{ScalIMS}. A brief introduction of \textit{ScalIMS} system is first given in section \ref{sec:scalims-introduction}, followed by the discussion of the background and related work in section \ref{sec:scalims-background}. The motivation for designing \textit{ScalIMS} and the major design highlights of \textit{ScalIMS} are given in section \ref{sec:scalims-motivation}. The major techniques for scaling the dataplane service chain and control plane service chain of the IMS system are described in section \ref{sec:scalims-cp} and \ref{sec:scalims-dp} respectively. Section \ref{sec:scalims-evaluation} demonstrates the performance of \textit{ScalIMS} system. Finally, we give concluding remarks in section \ref{sec:scalims-conclusion}.
+
+\section{Introduction} \label{sec:scalims-introduction}
 
 Traditional hardware-based network functions are notoriously hard and costly to deploy and scale. The recent paradigm of network function virtualization (NFV) advocates deploying software network functions in virtualized environments (e.g., VMs) on off-the-shelf servers, to significantly simplify deployment and scaling at much lowered costs~\cite{nfv-website}.
 
