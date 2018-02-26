@@ -23,9 +23,9 @@
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Malware detection in Bro.\relax }}{78}{figure.caption.147}
 \contentsline {figure}{\numberline {4.2}{\ignorespaces An Overview of \textit {NetStar}.\relax }}{85}{figure.caption.182}
 \contentsline {figure}{\numberline {4.3}{\ignorespaces Workflow of async-flow objects (P represents a packet).\relax }}{88}{figure.caption.186}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Malware detector using \textit {NetStar}.\relax }}{91}{figure.caption.188}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Malware detector using \textit {NetStar}.\relax }}{92}{figure.caption.188}
 \contentsline {figure}{\numberline {4.5}{\ignorespaces Micro benchmarking on packet processing speed.\relax }}{97}{figure.caption.196}
 \contentsline {figure}{\numberline {4.6}{\ignorespaces Micro benchmarking on asynchronous DB queries.\relax }}{98}{figure.caption.198}
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Performance comparison: NFs from the StatelessNF paper.\relax }}{99}{figure.caption.200}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Performance comparison: NFs from the StatelessNF paper.\relax }}{100}{figure.caption.200}
 \contentsline {figure}{\numberline {4.8}{\ignorespaces Performance comparison: different proxies.\relax }}{101}{figure.caption.203}
 \contentsline {figure}{\numberline {4.9}{\ignorespaces Performance comparison: IDS.\relax }}{102}{figure.caption.205}

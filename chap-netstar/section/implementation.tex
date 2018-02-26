@@ -1,5 +1,5 @@
 \section{Implemented NFs}
-\label{implementation}
+\label{sec:netstar-implementation}
 
 %The reason that we choose to implement \netstar on top of Seastar is two folds. First, Seastar has one of the most mature C++ future/promise implementation that allows future to be chained with arbitrary number of continuation functions. Other C++ future/promise implementations do exist \cite{}, but some of these are not mature enough to support chaining continuation functions. Second, Seastar has good integration with DPDK packet processing framework. In particular, it provides an efficient user-space TCP/IP stack and it is directly used by \netstar to implement application-level NFs like HTTP reverse proxy.
 

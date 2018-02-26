@@ -1,5 +1,5 @@
 \section{The \netstar~Framework}
-\label{framework}
+\label{sec:netstar-overview}
 %Having realized about the advantages of \netstar, this section discusses the architecture of \netstar framework in detail. %is dedicated to a detailed introduction of the
 
 \begin{figure}[!h]
@@ -26,7 +26,7 @@ We design \netstar, a future/promise based programming framework for building va
 
 
 \textbf{Build an L4 NF.} To process L4 packets, a special interface, referred to as the {\em async-flow interface}, is designed, which consists of an async-flow manager and several async-flow objects. %After the hook point distributes matching packets to the manager,
-The manager classifies received packets from the hook point into different network flows and pushes each flow to one async-flow object. The async-flow objects implement NF processing logic inside a simulated packet processing loop, using the future/promise abstraction for asynchronous operations. We will discuss our detailed design of the async-flow interface in Sec.~\ref{sec:ai}.
+The manager classifies received packets from the hook point into different network flows and pushes each flow to one async-flow object. The async-flow objects implement NF processing logic inside a simulated packet processing loop, using the future/promise abstraction for asynchronous operations. We will discuss our detailed design of the async-flow interface in Sec.~\ref{sec:netstar-framework}.
 
 \textbf{Build an L7 NF.} To handle L7 application-level payload, we reuse Seastar's TCP/IP stack. The socket interface exposed by the TCP/IP stack is a modern re-implementation of the traditional POSIX socket based on the future/promise abstraction. An established TCP connection exposes a socket, through which an input stream for reading and an output stream for writing application data are available. % which facilitates asynchronous server programming for exchanging application level requests with the clients.
 
