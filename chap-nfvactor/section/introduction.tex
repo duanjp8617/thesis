@@ -2,7 +2,10 @@
 \label{ch:nfvactor}
 \lhead{\chaptername \ \ref{ch:nfvactor}.\ \emph{\nfactor}}
 
+This chapter discusses the design and implementation of \nfactor. The chapter starts with an introduction to \nfactor using section \ref{sec:nfvactor-introduction}. Then the motivation for using the actor model is given in section \ref{sec:nfvactor-motivation}. The overall architecture of \nfactor~is given in \ref{sec:nfvactor-runtime-and-controller}, followed by the discussion of the APIs exposed by~\nfactor~for building NFs in section \ref{sec:nfvactor-nf-api}. The protocol for flow replication and migration is illustrated in section \ref{sec:nfvactor-migration-replication}. The performance of \nfactor~is demonstrated in section \ref{sec:nfvactor-evaluation}. Finally, the related work of \nfactor~is given in section \ref{sec:nfvactor-related-work} and a summary of \nfactor~is presented in section \ref{sec:nfvactor-conclusion}.
+
 \section{Introduction}
+\label{sec:nfvactor-introduction}
 
 Network function virtualization (NFV) advocates moving
 {\em network functions} (NFs) out of dedicated hardware middleboxes and running them as virtualized applications on commodity servers \cite{nfv-white-paper}. To enable effective large-scale deployment of virtual NFs, a number of NFV management systems have been proposed in recent years \cite{palkar2015e2, OpenBox, sekar2012design, anderson2012xomb, gember2012stratos, zhang2016opennetvm}, implementing a broad range of management functionalities. Among these functionalities, resilience guarantee, supported by flow migration and failure recovery mechanisms, is of particular importance in practical NFV systems.

@@ -1,5 +1,5 @@
 \section{Evaluation}
-\label{sec:experiments}
+\label{sec:nfvactor-evaluation}
 
 
 We evaluate \nfactor~using 4 Dell R430 servers, each equipped with an Intel Xeon E5-2650 CPU running at 2.30GHz with 20 logical CPU cores, 48GB memory and 2 Intel X710 10Gb NICs. The servers are connected through a 10GB Dell switch. In each server, the worker thread of each runtime is pinned to a dedicated logical core, while the RPC threads of all the runtimes are collectively pinned to logical core 0 to minimize the performance impact on the worker thread. To generate test traffic, we use a customized traffic generation module (the FlowGen module) of BESS \cite{bess}, which is capable of generating input traffic up to 10Gbps (at around 14Mpps) with 64-byte packets.

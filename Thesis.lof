@@ -12,13 +12,13 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {3.1}{\ignorespaces An overview of the basic components of \textit {NFVactor}. Three clusters are shown in this figure: a cluster for provisioning service chain `NF1$\rightarrow $NF2$\rightarrow $NF3', a cluster for service chain `NF4$\rightarrow $NF5' and a cluster for service chain `NF6$\rightarrow $NF7'\relax }}{47}{figure.caption.105}
 \contentsline {figure}{\numberline {3.2}{\ignorespaces The internal structure of a runtime.\relax }}{49}{figure.caption.109}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Flow replication and recovery: \textbf {RT} - replication target actor, \textbf {RS} - Replication source actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.)\relax }}{56}{figure.caption.122}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Flow replication and recovery: \textbf {RT} - replication target actor, \textbf {RS} - Replication source actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.)\relax }}{57}{figure.caption.122}
 \contentsline {figure}{\numberline {3.4}{\ignorespaces The 3 flow migration steps: \textbf {MT} - migration target flow actor, \textbf {MS} - migration source flow actor, \textbf {LA} - liaison actor, \textbf {VS} - virtual switch actor; \textbf {dotted line} - flow packets, \textbf {dashed line} - actor messages.\relax }}{58}{figure.caption.126}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Comparison of runtime architecture.\relax }}{60}{figure.caption.128}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Comparison of runtime architecture.\relax }}{61}{figure.caption.128}
 \contentsline {figure}{\numberline {3.6}{\ignorespaces Performance of the Runtime.\relax }}{64}{figure.caption.131}
 \contentsline {figure}{\numberline {3.7}{\ignorespaces System scalability.\relax }}{66}{figure.caption.135}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Performance of flow replication.\relax }}{67}{figure.caption.137}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Flow migration completion time.\relax }}{69}{figure.caption.140}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Performance of flow replication.\relax }}{68}{figure.caption.137}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Flow migration completion time.\relax }}{70}{figure.caption.140}
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Malware detection in Bro.\relax }}{78}{figure.caption.147}
 \contentsline {figure}{\numberline {4.2}{\ignorespaces An Overview of \textit {NetStar}.\relax }}{85}{figure.caption.182}

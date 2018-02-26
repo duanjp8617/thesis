@@ -1,6 +1,7 @@
 %\section{Runtime Architecture}
 
 \section {The NFVactor Framework}
+\label{sec:nfvactor-runtime-and-controller}
 
 \begin{figure}[!t]
   \centering
@@ -50,7 +51,7 @@ The runtime has three basic work flows:
 
 \noindent \textbf{Process Dataplane Flows:} The worker thread constantly polls dataplane flow packets from the input port. For each packet, the worker thread uses the 5-tuple of the packet (\ie, source IP address, destination IP address, transport-layer protocol, source port and destination port) to retrieve the corresponding flow actor and sends the packet to the flow actor for processing. Running in its own logical thread, the flow actor processes the packet along the configured service chain and then sends the processed packet out from the output port.
 
-\noindent \textbf{Process Remote Actor Messages:} During distributed flow migration and replication, {\em remote actor messages} are exchanged among actors running on different runtimes. The runtime is equipped with a reliable message passing channel (Sec.~\ref{sec:implementation}) to reliably send and receive remote actor messages over the control port. The received remote actor messages are handed over to the destination actors for processing. The sent remote actor messages are reliably delivered to their receivers.
+\noindent \textbf{Process Remote Actor Messages:} During distributed flow migration and replication, {\em remote actor messages} are exchanged among actors running on different runtimes. The runtime is equipped with a reliable message passing channel (Sec.~\ref{sec:nfvactor-implementation}) to reliably send and receive remote actor messages over the control port. The received remote actor messages are handed over to the destination actors for processing. The sent remote actor messages are reliably delivered to their receivers.
 
 \noindent \textbf{Process Control RPCs:} The RPC thread forwards received RPC requests to a {\em liaison actor} in the worker thread through the shared ring buffer. The liaison actor coordinates with flow actors via {\em local actor messages}, to handle RPC requests sent from the coordinator.
 
@@ -59,7 +60,7 @@ The runtime has three basic work flows:
 \subsubsection{Service Chain}
 \label{sec:rtsc}
 
-Each runtime is configured with a sequential service chain (\eg, firewall$\rightarrow$NAT$\rightarrow$load-balancer) and initializes all the NFs along the service chain upon booting. When the flow actor processes packets, it calls the $process\_pkt(input\_pkt, fs, ss)$ API (Sec.~\ref{sec:NFAPIs}) of each NF according to the service chain structure to implement the service chain processing logic.
+Each runtime is configured with a sequential service chain (\eg, firewall$\rightarrow$NAT$\rightarrow$load-balancer) and initializes all the NFs along the service chain upon booting. When the flow actor processes packets, it calls the $process\_pkt(input\_pkt, fs, ss)$ API (Sec.~\ref{sec:nfvactor-nf-api}) of each NF according to the service chain structure to implement the service chain processing logic.
 
 %Due to the flexibility of the actor model, we believe that advanced service graph models \cite{OpenBox} can be easily embedded into~\nfactor~as well.
 
