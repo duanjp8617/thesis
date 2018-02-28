@@ -1,0 +1,38 @@
+\chapter {Background}
+\label{ch:background}
+\lhead{\chaptername \ \ref{ch:background}.\ \emph{Background}} %
+
+Since the introduction of NFV \cite{nfv-white-paper}, a broad range of studies have been carried out, for bridging the performance gap between specialized hardware and network functions \cite{hwang2015netvm, bess, martins2014clickos, 199352}, scaling and managing NFV systems \cite{gember2012stratos, palkar2015e2}, flow migration \cite{rajagopalan2013split, khalid2016paving, gember2015opennf, qazi2017high} and NF replication \cite{rajagopalan2013pico, sherry2015rollback}.
+
+\section{Performance Optimization of Software NF}
+
+NFV advocates running NF software inside VMs, to simplify the deployment and management of NFs. However, running legacy NF software directly on VMs incurs significant context switching cost~\cite{rizzo2013speeding}, limiting the maximum throughput of NF. To solve this problem, a special technique called kernel-bypassing \cite{180843} is adopted. Using kernel-bypassing, the NF software can directly fetch network packets from a shared memory area and completely eliminate expensive context switching cost.
+
+There are several research work discussing how to use kernel-bypassing to speed-up packet processing performance of NFs. ClickOS~\cite{martins2014clickos} integrates kernel-bypassing technique into Xen \cite{xen} hypervisor and achieves 10Gbps line-rate processing performance. NetVM~\cite{hwang2015netvm} is similar to ClickOS as it also leverages kernel-bypassing, but NetVM focuses on improving the packet processing performance for KVM \cite{kvm} hypervisor. While ClickOS and NetVM improve the performance of virtualized NFs, they are not flexible enough for building up a large cluster. BESS \cite{bess} combines kernel-bypassing technique with a generic scheduler for constructing complex data-plane switching path, making it possible for building efficient NF cluster. NetBricks \cite{199352} shares similar design goal as BESS, but it is implemented with Rust \cite{rust} programming language for improved data-plane security and robustness.
+
+\section{Scaling and Managing NFV System}
+
+An important goal of NFV is to effectively scale and manage a cluster running various NFs. To achieve this goal, the NFV system needs a manager which is aware of the resource consumption, workload statistics and network congestion information inside the cluster. The manager should combine all the information and derive an intelligent decision to scale and manage the NF cluster.
+
+There are several studies on how to design a management system for an NF cluster. CoMB~\cite{sekar2012design} focus on scaling NFs in a single server, by designing customized architecture to unify NFs inside the server. Stratos~\cite{gember2012stratos} jointly consider the placement of NFs and the flow distribution within an NF cluster, using on-demand provisioning and VM migration to mitigate hotspots. E2~\cite{palkar2015e2} scales NFV service chains inside a single NF cluster, exploiting high-performance inter-NF data paths constructed over BESS \cite{bess}.
+
+Even though these studies can effective scale NFs within an NF cluster located inside the datacenter, there are many important network services that require the scalability to be extended across geo-distributed datacenters. This scenario calls for the design of new NFV management system that can scale NFV service chains across multiple datacenters.
+
+\section {Flow Migration}
+
+Flow migration is an effective approach for tuning the overloaded or underloaded NF instances. By migrating a network flow from an overloaded NF to another NF, we can mitigate the overload condition without causing a service outage for the users.
+
+Split/Merge \cite{rajagopalan2013split} is the pioneering work on flow migration. It separates core NF processing logic from important per-flow states and uses a centralized SDN controller to migrate flows. OpenNF \cite{gember2015opennf} improves over Split/Merge by proposing a migration protocol that can prevent packet reordering and packet loss. However, enabling flow migration for NFs is a challenging task, as it requires great manual work to patch the NF source files \cite{gember2015opennf}. Realizing this problem, StateAlyzr \cite{khalid2016paving} uses static analysis to automate flow state extraction and simplify human effort for enabling flow migration. Another problem with existing flow migration framework is that the migration performance is inadequate to serve real-world traffic. PEPC \cite{qazi2017high} enables high-performance flow migration for EPC core network \cite{epc}, but its flow migration method lacks generality when being used to migrate flows for other NFV systems.
+
+\section{NF Replication}
+
+NFs are important gateways to the underlying network services. If a NF fails, the network service fails as well. To improve the availability of the entire network service, it is important to replicate the running NF and recover the failed NF.
+
+Pico \cite{rajagopalan2013pico} checkpoints the packet processing state of an NF and saves these state to a backup VM. The major problem of Pico is that it introduces high packet processing latency due to constant checkpointing. FTMB \cite{sherry2015rollback} improves over Pico by introducing a replay-based design. FTMB checkpoints the running NF periodically and reconstructs a failed NF by replaying packet logs. Even though FTMB greatly improves the packet processing throughput and reduces the packet processing latency when compared to Pico, FTMB still introduces a high packet processing latency when checkpointing kicks in. StatelessNF \cite{201545} uses a completely different approach as compared to both Pico and FTMB, by storing important per-flow states onto a reliable database \cite{ongaro2011fast}. Due to frequent communication with the database service, StatelessNF must rely on asynchronous programming to achieve good performance. However, regular asynchronous programming with callbacks functions may significantly increase the complexity and decrease the robustness of a StatelessNF implementation.
+
+%a regular implementation of StatelessNF based on callbacks may significantly increase the implementation complexity and decrease the implementation robustness.
+
+% with a modern-architecture for EPC c
+
+
+% Running NF software (e.g., DP packet processing software) on VMs incurs significant context switching cost~\cite{rizzo2013speeding}, limiting the maximum throughput of a VNF. To solve this problem, ClickOS~\cite{martins2014clickos} maps packets directly from NIC receive queues to a shared memory region, and fetch packets directly from that shared memory region~\cite{dpdk}, which greatly improve packet processing throughput. However, this approach completely by-passes the existing kernel networking stack, unable to support VNFs (e.g., S-CSCF and P-CSCF used by IMS system) that use the traditional TCP/IP stack.

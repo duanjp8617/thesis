@@ -1,5 +1,26 @@
 \section{Summary}\label{sec:scalims-conclusion}
 
+\subsection{Comparison with Existing Work}
+
+%\noindent \textbf{Scalability.}
+Scaling of service chains has been investigated in a single server, a computing cluster or a datacenter. CoMB~\cite{sekar2012design} focus on scaling VNFs in a single server, %for better performance. %Even though their implementations achieve good performance, but it lacks generality and flexibility.
+ by designing customized architecture to unify VNFs inside a single server. % and they can not be cannot be seemlessly integrated into existing SDN framework.
+ %E2~\cite{palkar2015e2}, Stratos~\cite{gember2012stratos} and Slick~\cite{anwer2015programming} study scaling of VNFs in a single SDN-enabled datacenter.
+ E2~\cite{palkar2015e2} scales VNF service chains in a single datacenter, %scales VNF instances  within a computing cluster connected through SDN enabled switches through
+ exploiting high-performance inter-VNF data paths through SDN-enabled switches. % it has its own high performance inter-VNF datapath.
+Stratos~\cite{gember2012stratos} %scales VNF instances by
+ jointly consider VNF placement and flow distribution within a datacenter, using on-demand VNF provisioning and VM migration to mitigate hotspots.
+
+%To our knowledge, there do not exist NFV management frameworks that scale VNF service chains across geo-distributed datacenters. % while \textit{ScalIMS} concentrates on scaling NFV service chains across datacenters.
+The management systems mentioned above cannot be directly extended to the multi-datacenter setting. One primary reason is that SDN controllers~\cite{mckeown2008openflow} are extensively used in these systems to facilitate routing, scaling and load-balancing within a datacenter. However, SDN controllers are rarely available in the WAN, except for among datacenters of a few large providers such as Google~\cite{jain2013b4} and Microsoft~\cite{hong2013achieving}.
+%\chuan{change this reference to B4 or SWAN}. %It is extremely hard for a SDN controller to set up flows on other datacenters, which incurs too much delay and hurts flow performance. One possible approach is to deploy one SDN-enabled management system in each datacenter, but there is no existing work on coordinating the behavior of such independent scaling systems, needed for deploying and scaling geo-distributed service chains. %However, scaling systems on different datacenters need to agree on complicated task such as coordinated VNF instance provision and collective flow routing. And all these problems call for an efficient design of a multi-datacenter scaling system.
+%A new management system is in need, that efficiently coordinates service chain deployment and scaling, as well as flow routing, across multiple data centers.
+ \textit{ScalIMS} is a NFV management system that efficiently coordinates service chain deployment and scaling, as well as flow routing, across multiple data centers. \textit{ScalIMS} uses similar methodologies as in~\cite{palkar2015e2} and \cite{gember2012stratos} when scaling NFV service chains within a datacenter, but adopts a novel distributed flow routing approach and a proactive scaling strategy to scale NFV service chains across multiple datacenters.
+
+Similar with \textit{ScalIMS}, Klein \cite{qazi2016klein} also scales NFV service chains across multiple datacenters. However, it focuses on scaling EPC system \cite{epc} and does not use a hybrid scaling strategy as \textit{ScalIMS} does. Ren et al. \cite{ren2016dynamic} propose a VNF dynamic auto scaling algorithm for 5G networks, but it lacks a real-world implementation when compared to \textit{ScalIMS}.
+
+\subsection{Conclusion}
+
 This chapter proposes \textit{ScalIMS}, a NFV management system designed to deploy and scale service chains spanning geo-distributed datacenters, using the case of an IMS. \textit{ScalIMS} features joint proactive and reactive scaling of DP and CP service chains, for timely and cost-effective provisioning of practical network services. Evaluation of our prototype implementation on IBM SoftLayer cloud shows that: (i) \textit{ScalIMS} improves QoS of user traffic by a large margin when compared with pure reactive scaling; (ii) when peak workload arrives asynchronously over the geographic span, \textit{ScalIMS} effectively reduces the total number of VNF instances provisioned while guaranteeing excellent QoS. %\textit{Finally}, we show that distributed routing framework of \textit{ScalIMS} accurately route flows across geo-distributed datacenters.
 
 %\vspace{-2mm}
