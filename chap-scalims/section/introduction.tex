@@ -14,8 +14,9 @@ Despite the advantages, many problems remain when introducing NFV to the provisi
   deployed in the on-premise cluster/datacenter of the service provider.
 
 
-  There are many other service chains which render a geo-distributed nature, e.g., the service chains in IP Multimedia Subsystems (IMS) \cite{3gpp-ims} and mobile core networks~\cite{epc} (examples presented in Fig.~\ref{fig:IMS_architecture}). In these systems, the network functions are desirably deployed close to geo-dispersed users, %However, they cannot be directly applied to other service chains that provide inter-connection services for users residing widely apart
- and putting the service chain in a single datacenter would be unfavourable as compared to distributing its VNFs across several datacenters. %, to enable low-delay access of the users to the network functions.
+ There are many other service chains providing communication services, e.g., the service chains in IP Multimedia Subsystems (IMS) \cite{3gpp-ims} and mobile core networks~\cite{epc} (examples presented in Fig.~\ref{fig:IMS_architecture}). These service chains enable people located in different areas to communicate with each other and their communication traffic must go through these service chains. Such service chains render a geo-distributed nature: the network functions are desirably deployed close to geo-dispersed users, and putting the service chain in a single datacenter would be unfavourable as compared to distributing its VNFs across several datacenters. By correctly placing VNFs of a service chain among different datacenters, the scaling system can reduce both the end-to-end delay and resource consumption.
+
+
  The existing management systems cannot be directly applied to handle such geo-distributed service chains \cite{qazi2016klein}, due to the escalated challenges on efficient interconnection of VNFs over the WAN, dynamic decision making on how VNF instances are deployed in different datacenters, and optimally dispatching individual flows through the deployed instances.
  %and dynamic decision making on the numbers of VNF instances to deploy in different datacenters, adjusting them over time, and optimally dispatching individual flows through the deployed instances.
 

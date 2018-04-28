@@ -2,7 +2,7 @@
 \label{ch:background}
 \lhead{\chaptername \ \ref{ch:background}.\ \emph{Background}} %
 
-Since the introduction of NFV \cite{nfv-white-paper}, a broad range of studies have been carried out, for bridging the performance gap between specialized hardware and network functions \cite{hwang2015netvm, bess, martins2014clickos, 199352}, scaling and managing NFV systems \cite{gember2012stratos, palkar2015e2}, flow migration \cite{rajagopalan2013split, khalid2016paving, gember2015opennf, qazi2017high} and NF replication \cite{rajagopalan2013pico, sherry2015rollback}.
+Since the introduction of NFV \cite{nfv-white-paper}, a broad range of studies have been carried out, for bridging the performance gap between specialized hardware and network functions \cite{hwang2015netvm, bess, martins2014clickos, 199352}, scaling and managing NFV systems \cite{gember2012stratos, palkar2015e2, 211243}, flow migration \cite{rajagopalan2013split, khalid2016paving, gember2015opennf, qazi2017high} and NF replication \cite{rajagopalan2013pico, sherry2015rollback}.
 
 \section{Performance Optimization of Software NF}
 
@@ -23,6 +23,8 @@ Even though these studies can effective scale NFs within an NF cluster located i
 Flow migration is an effective approach for tuning the overloaded or underloaded NF instances. By migrating a network flow from an overloaded NF to another NF, we can mitigate the overload condition without causing a service outage for the users.
 
 Split/Merge \cite{rajagopalan2013split} is the pioneering work on flow migration. It separates core NF processing logic from important per-flow states and uses a centralized SDN controller to migrate flows. OpenNF \cite{gember2015opennf} improves over Split/Merge by proposing a migration protocol that can prevent packet reordering and packet loss. However, enabling flow migration for NFs is a challenging task, as it requires great manual work to patch the NF source files \cite{gember2015opennf}. Realizing this problem, StateAlyzr \cite{khalid2016paving} uses static analysis to automate flow state extraction and simplify human effort for enabling flow migration. Another problem with existing flow migration framework is that the migration performance is inadequate to serve real-world traffic. PEPC \cite{qazi2017high} enables high-performance flow migration for EPC core network \cite{epc}, but its flow migration method lacks generality when being used to migrate flows for other NFV systems.
+
+Aside from flow migration, virtual machine migration is another candidate for scaling NFV services. By migrating virtual network function from one VM to another, the network operator can optimize the latencies experienced by the input traffic of the NF service chain \cite{cho2017real, carpio2017balancing} and balance the workload processed by different NFs \cite{carpio2017balancing}. However, the completion time for virtual machine migration is way-longer \cite{nelson2005fast} as compared to flow migration \cite{gember2015opennf}, which may cause significant packet loss during the migration process and violate stringent QoS requirement of NFV.
 
 \section{NF Replication}
 

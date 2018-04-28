@@ -2,13 +2,13 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Mappings saved on local controller\relax }}{29}{table.caption.45}
-\contentsline {table}{\numberline {3.2}{\ignorespaces VNF Capacity and Overload Threshold\relax }}{39}{table.caption.104}
+\contentsline {table}{\numberline {3.1}{\ignorespaces Mappings saved on local controller\relax }}{30}{table.caption.46}
+\contentsline {table}{\numberline {3.2}{\ignorespaces VNF Capacity and Overload Threshold\relax }}{41}{table.caption.105}
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Control RPCs Exposed at Each Runtime\relax }}{57}{table.caption.130}
-\contentsline {table}{\numberline {4.2}{\ignorespaces APIs for implementing NFs in \textit {NFVactor}\relax }}{59}{table.caption.132}
-\contentsline {table}{\numberline {4.3}{\ignorespaces Recovery time and \# of flows recovered\relax }}{74}{table.caption.154}
+\contentsline {table}{\numberline {4.1}{\ignorespaces Control RPCs Exposed at Each Runtime\relax }}{59}{table.caption.131}
+\contentsline {table}{\numberline {4.2}{\ignorespaces APIs for implementing NFs in \textit {NFVactor}\relax }}{61}{table.caption.133}
+\contentsline {table}{\numberline {4.3}{\ignorespaces Recovery time and \# of flows recovered\relax }}{75}{table.caption.155}
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces LOC Comparison: NFs from the StatelessNF Paper\relax }}{107}{table.caption.218}
-\contentsline {table}{\numberline {5.2}{\ignorespaces Performance of Malware Detectors\relax }}{109}{table.caption.224}
+\contentsline {table}{\numberline {5.1}{\ignorespaces LOC Comparison: NFs from the StatelessNF Paper\relax }}{108}{table.caption.219}
+\contentsline {table}{\numberline {5.2}{\ignorespaces Performance of Malware Detectors\relax }}{110}{table.caption.225}
 \addvspace {10\p@ }

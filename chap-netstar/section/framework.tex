@@ -106,12 +106,14 @@ Using malware detection in IDS as an example, the core processing logic includes
 \vspace{1mm}
 \noindent\textbf{Final Future Object and Its Continuation Function.} The last continuation function in the asynchronous `future/promise-continuation' chain is forced to return a future object containing an action decision (\eg, drop or forward in the malware detection example). This future object becomes available when all asynchronous operations in the core processing logic have been completed. A continuation function is appended to this future object, which receives the action decision from the future object and carries out the action accordingly (\eg, drops the packet or forwards it to the next hop. The current packet context is then destroyed, and the packet processing loop moves on to fetch another packet from the FIFO queue (if it is not empty), and recursively restarts itself.
 
+%\vpsace{1mm}
+\vspace{1mm}
+\noindent\textbf{Timeout of Async-flow Object and Safety Guarantee.} When the flow handled by the async-flow object eventually becomes idle, a timeout event is triggered, which stops the packet processing loop and transforms a future object into ready state. This future object is used to receive the timeout notification and the continuation function appended to it does the actual clean up task, which deallocates the async-flow object and other auxiliary objects used by the async-flow object. This mechanism guarantees that whenever the packet processing loop runs, the async-flow object and other auxiliary objects used by it are always safe to visit.
+
 
 \vspace{1mm}
 \noindent\textbf{Switching to Another Async-flow Object.} After an async-flow object has issued an asynchronous operation, the thread that the async-flow interface is running in moves on to handle another async-flow object, \ie, the packet processing loop in another async-flow object starts to fetch packets from its own FIFO queue and processes them. Different async-flow objects implement exactly the same logic in an NF. The programming style in implementing packet processing logic is very much like synchronous programming, while full asynchronous packet processing can be achieved. %All these attribute to our effective interface design based on the future/promise paradigm.
 % we effectively utilize future object transformation provided by future/promise abstraction (see Sec.~\ref{sec:tranform-future-object}).
-
-
 
 
 %\textbf{Return \lstinline[style=InlineStyle]{future<action>}.} By returning \lstinline[style=InlineStyle]{future<action>}, whether to forward or drop the packet is offloaded to the async-flow object. The async-flow object can append another continuation to the returned \lstinline[style=InlineStyle]{future<action>}: when \lstinline[style=InlineStyle]{future<action>} becomes available, then the loop function has finished all asynchronous processing and the async-flow is safe to forward or drop the packet depending the action decision contained in \lstinline[style=InlineStyle]{future<action>} and destroy the current packet context.
